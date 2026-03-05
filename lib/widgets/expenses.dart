@@ -17,7 +17,7 @@ class _ExpensesState extends State<Expenses> {
       title: 'Czipsiki z pupciki',
       amount: 19.99,
       date: DateTime.now(),
-      category: Category.lakocieDlaLakoci,
+      category: Category.jedzenie,
     ),
     Expense(
       title: 'Wompcie pompcie',
@@ -29,6 +29,12 @@ class _ExpensesState extends State<Expenses> {
   @override
   Widget build(BuildContext context) {
     return (Scaffold(
+      appBar: AppBar(
+        title: const Text("Flutter expense tracker"),
+        actions: [
+          IconButton(onPressed: (){}, icon: const Icon(Icons.add),)
+        ],
+      ),
       body: Column(
         children: [
           const Text('czart'),
