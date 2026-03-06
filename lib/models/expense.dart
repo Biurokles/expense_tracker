@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
 
-const  uuid = Uuid();
 final formatter = DateFormat.yMMMMEEEEd();
+const uuid = Uuid();
 
-enum Category{jedzenie, wycieczkaaa,lakocieDlaLakoci, inne }
+enum Category { jedzenie, wycieczkaaa, lakocieDlaLakoci, inne }
 
 const categoryIcons = {
   Category.jedzenie: Icons.food_bank,
@@ -13,13 +13,14 @@ const categoryIcons = {
   Category.lakocieDlaLakoci: Icons.girl,
   Category.inne: Icons.car_rental,
 };
+
 class Expense {
   Expense({
     required this.title,
     required this.amount,
     required this.date,
     required this.category,
-  }): id = uuid.v4();
+  }) : id = uuid.v4();
 
   final String id;
   final String title;
@@ -27,11 +28,29 @@ class Expense {
   final DateTime date;
   final Category category;
 
-
-  String get getFormattedDate
-  {
+  String get getFormattedDate {
     return formatter.format(date);
   }
+}
 
+class ExpenseBucket {
+  const ExpenseBucket({
+    required this.category,
+    required this.expenses,
+  });
 
+  ExpenseBucket.forCategory(List<Expense> allExpenses, this.category)
+    : expenses = allExpenses
+          .where((expense) => expense.category == category)
+          .toList();
+  final Category category;
+  final List<Expense> expenses;
+  double get totalExpenses {
+    double sum = 0;
+    for (final expense in expenses) {
+      sum += expense.amount;
+    }
+
+    return sum;
+  }
 }
