@@ -94,7 +94,7 @@ class _NewExpenseState extends State<NewExpense> {
                   controller: _amountController,
                   keyboardType: TextInputType.number,
                   inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
+                    FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
                   ],
                   decoration: const InputDecoration(
                     prefixText: 'polskich złociszy  ',
@@ -163,7 +163,7 @@ class _NewExpenseState extends State<NewExpense> {
                   _amountController.clear();
                   _titleController.clear();
                 },
-                child: Text('Nieee Zaaapisuuj'),
+                child: Text('Nie Zapisuuuj'),
               ),
             ],
           ),

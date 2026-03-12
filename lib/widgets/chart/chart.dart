@@ -55,10 +55,17 @@ class Chart extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                for (final bucket in buckets)
-                  ChartBar(
-                    fill: bucket.totalExpenses / maxTotalExpense,
-                  ),
+                if (maxTotalExpense == 0)
+                  (Center(
+                    child: Text(
+                      "Ufff, ja już myślałem że wydajesz nasze pieniążki w tym miesiącu",
+                    ),
+                  ))
+                else
+                  for (final bucket in buckets)
+                    ChartBar(
+                      fill: bucket.totalExpenses / maxTotalExpense,
+                    ),
               ],
             ),
           ),

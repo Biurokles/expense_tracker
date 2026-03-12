@@ -1,8 +1,10 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
 
-final formatter = DateFormat.yMMMMEEEEd();
+final formatter = DateFormat('dd/MM');
 const uuid = Uuid();
 
 enum Category { jedzenie, wycieczkaaa, lakocieDlaLakoci, inne }
@@ -42,6 +44,7 @@ class ExpenseBucket {
   ExpenseBucket.forCategory(List<Expense> allExpenses, this.category)
     : expenses = allExpenses
           .where((expense) => expense.category == category)
+          .where((expense) =>expense.date.month ==  int.parse(DateFormat.M().format(DateTime.now())))
           .toList();
   final Category category;
   final List<Expense> expenses;
@@ -53,4 +56,6 @@ class ExpenseBucket {
 
     return sum;
   }
+
+  
 }

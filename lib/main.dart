@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/widgets/expenses.dart';
+//import 'package:flutter/services.dart';
 
-void main() {
-  runApp(const MyApp());
-}
 
 var kColorScheme = ColorScheme.fromSeed(seedColor: Colors.blue);
 var kDarkColorScheme = ColorScheme.fromSeed(
@@ -11,12 +9,13 @@ var kDarkColorScheme = ColorScheme.fromSeed(
   seedColor: const Color.fromARGB(255, 5, 99, 125),
 );
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+void main() {
+  // WidgetsFlutterBinding.ensureInitialized();
+  // SystemChrome.setPreferredOrientations([
+  //   DeviceOrientation.portraitUp
+  // ]).then((fn){
+    runApp(
+MaterialApp(
       darkTheme: ThemeData.dark().copyWith(
         colorScheme: kDarkColorScheme,
         cardTheme: const CardThemeData().copyWith(
@@ -56,6 +55,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.system,
       home: const Expenses(),
-    );
-  }
+    ));
+  //});
 }
+  
+
+
+

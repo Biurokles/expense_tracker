@@ -31,6 +31,7 @@ class _ExpensesState extends State<Expenses> {
 
   void _openAddExpensesOverlay() {
     showModalBottomSheet(
+      useSafeArea: true,
       isScrollControlled: true,
       context: context,
       builder: (ctx) => NewExpense(onAddExpense: _addExpense),
@@ -63,7 +64,7 @@ class _ExpensesState extends State<Expenses> {
               SnackBar(
                 content: Icon(
                   Icons.face_5,
-                  color: Colors.white,
+                  color: Colors.black,
                 ),
               ),
             );
@@ -87,7 +88,7 @@ class _ExpensesState extends State<Expenses> {
     return (Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Flutter expense tracker",
+          "Łakocia wydatki śledź",
         ),
         actions: [
           IconButton(
