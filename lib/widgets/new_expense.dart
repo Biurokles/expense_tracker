@@ -102,7 +102,7 @@ class _NewExpenseState extends State<NewExpense> {
                   ),
                 ),
               ),
-              SizedBox(
+             const SizedBox(
                 width: 16,
               ),
               Expanded(
@@ -124,7 +124,7 @@ class _NewExpenseState extends State<NewExpense> {
               ),
             ],
           ),
-          SizedBox(height: 16),
+         const SizedBox(height: 16),
           Row(
             children: [
               DropdownButton(
@@ -149,12 +149,12 @@ class _NewExpenseState extends State<NewExpense> {
                   });
                 },
               ),
-              Spacer(),
+             const Spacer(),
               ElevatedButton(
                 onPressed: _submitExpenseData,
                 child: Text('Zaaapiiisz'),
               ),
-              SizedBox(
+             const SizedBox(
                 width: 10,
               ),
               ElevatedButton(

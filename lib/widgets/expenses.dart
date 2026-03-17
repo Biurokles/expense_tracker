@@ -1,3 +1,4 @@
+import 'package:expense_tracker/services/expense_storage.dart';
 import 'package:expense_tracker/widgets/chart/chart.dart';
 import 'package:expense_tracker/widgets/expenses_list/expenses_list.dart';
 import 'package:expense_tracker/widgets/new_expense.dart';
@@ -11,23 +12,24 @@ class Expenses extends StatefulWidget {
   State<Expenses> createState() {
     return _ExpensesState();
   }
+
+  
 }
 
+
 class _ExpensesState extends State<Expenses> {
-  final List<Expense> _reqisteredExpenses = [
-    Expense(
-      title: 'Czipsiki z pupciki',
-      amount: 19.99,
-      date: DateTime.now(),
-      category: Category.jedzenie,
-    ),
-    Expense(
-      title: 'Wompcie pompcie',
-      amount: 21.37,
-      date: DateTime.now(),
-      category: Category.wycieczkaaa,
-    ),
-  ];
+
+@override
+void initState() {
+  super.initState();
+
+  ExpenseStorage.load().then((loadedExpenses) {
+    setState(() {
+      _registeredExpenses = loadedExpenses;
+    });
+  });
+}
+  late List<Expense> _registeredExpenses;
 
   void _openAddExpensesOverlay() {
     showModalBottomSheet(
@@ -40,28 +42,35 @@ class _ExpensesState extends State<Expenses> {
 
   void _addExpense(Expense expense) {
     setState(() {
-      _reqisteredExpenses.add(expense);
+      _registeredExpenses.add(expense);
+      ExpenseStorage.save(_registeredExpenses);
     });
   }
 
   void _removeExpense(Expense expense) {
-    final expenseIndex = _reqisteredExpenses.indexOf(expense);
+    final expenseIndex = _registeredExpenses.indexOf(expense);
     setState(() {
-      _reqisteredExpenses.remove(expense);
+      _registeredExpenses.remove(expense);
+      ExpenseStorage.delete(expense.id);
     });
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        duration: const Duration(seconds: 3),
+        persist: false,
+        duration: const Duration(seconds: 1),
         content: const Text('I do Oskroci wracają pieniązki Iiiii'),
         action: SnackBarAction(
           label: 'wydaj spowrotem',
           onPressed: () {
             setState(() {
-              _reqisteredExpenses.insert(expenseIndex, expense);
+              _registeredExpenses.insert(expenseIndex, expense);
+              ExpenseStorage.save(_registeredExpenses);
+
             });
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
+                duration: const Duration(seconds: 1),
+                persist: false,
                 content: Icon(
                   Icons.face_5,
                   color: Colors.black,
@@ -79,9 +88,9 @@ class _ExpensesState extends State<Expenses> {
     Widget mainContent = Center(
       child: Text("Ufff, ja już myślałem że wydajesz nasze pieniążki"),
     );
-    if (_reqisteredExpenses.isNotEmpty) {
+    if (_registeredExpenses.isNotEmpty) {
       mainContent = ExpensesList(
-        expenses: _reqisteredExpenses,
+        expenses: _registeredExpenses,
         onRemoveExpense: _removeExpense,
       );
     }
@@ -99,9 +108,9 @@ class _ExpensesState extends State<Expenses> {
       ),
       body: Column(
         children: [
-          _reqisteredExpenses.isNotEmpty
-              ? Chart(expenses: _reqisteredExpenses)
-              : Text('pusto tu womp womp'),
+          _registeredExpenses.isNotEmpty
+              ? Chart(expenses: _registeredExpenses)
+              : Text(''),
           Expanded(child: mainContent),
         ],
       ),
