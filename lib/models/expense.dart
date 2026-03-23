@@ -1,19 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'category.dart';
+
 final formatter = DateFormat('dd/MM');
 const uuid = Uuid();
 
-enum Category { jedzenie, wycieczkaaa, lakocieDlaLakoci, inne }
 
-const categoryIcons = {
-  Category.jedzenie: Icons.food_bank,
-  Category.wycieczkaaa: Icons.travel_explore_sharp,
-  Category.lakocieDlaLakoci: Icons.girl,
-  Category.inne: Icons.car_rental,
-};
+
 
 class Expense {
   Expense({
@@ -34,13 +27,13 @@ class Expense {
     return formatter.format(date);
   }
 
-    Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'title': title,
       'amount': amount,
       'date': date.toIso8601String(),
-      'category': category.name,
+      'category': category.toJson(),
     };
   }
 
@@ -50,14 +43,10 @@ class Expense {
       title: json['title'],
       amount: json['amount'],
       date: DateTime.parse(json['date']),
-      category: Category.values.firstWhere(
-        (e) => e.name == json['category'],
-      ),
+      category: Category.fromJson(json['category'])
     );
   }
 }
-
-
 
 class ExpenseBucket {
   const ExpenseBucket({

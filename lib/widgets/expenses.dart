@@ -1,4 +1,5 @@
 import 'package:expense_tracker/services/expense_storage.dart';
+import 'package:expense_tracker/widgets/categories/new_category.dart';
 import 'package:expense_tracker/widgets/chart/chart.dart';
 import 'package:expense_tracker/widgets/expenses_list/expenses_list.dart';
 import 'package:expense_tracker/widgets/new_expense.dart';
@@ -12,23 +13,20 @@ class Expenses extends StatefulWidget {
   State<Expenses> createState() {
     return _ExpensesState();
   }
-
-  
 }
-
 
 class _ExpensesState extends State<Expenses> {
+  @override
+  void initState() {
+    super.initState();
 
-@override
-void initState() {
-  super.initState();
-
-  ExpenseStorage.load().then((loadedExpenses) {
-    setState(() {
-      _registeredExpenses = loadedExpenses;
+    ExpenseStorage.load().then((loadedExpenses) {
+      setState(() {
+        _registeredExpenses = loadedExpenses;
+      });
     });
-  });
-}
+  }
+
   late List<Expense> _registeredExpenses;
 
   void _openAddExpensesOverlay() {
@@ -65,7 +63,6 @@ void initState() {
             setState(() {
               _registeredExpenses.insert(expenseIndex, expense);
               ExpenseStorage.save(_registeredExpenses);
-
             });
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -80,6 +77,15 @@ void initState() {
           },
         ),
       ),
+    );
+  }
+
+  void _openAddCategoriesOverlay() {
+    showModalBottomSheet(
+      useSafeArea: true,
+      isScrollControlled: true,
+      context: context,
+      builder: (ctx) => NewCategory(),
     );
   }
 
@@ -100,6 +106,10 @@ void initState() {
           "Łakocia wydatki śledź",
         ),
         actions: [
+          IconButton(
+            onPressed: _openAddCategoriesOverlay,
+            icon: const Icon(Icons.category),
+          ),
           IconButton(
             onPressed: _openAddExpensesOverlay,
             icon: const Icon(Icons.add),

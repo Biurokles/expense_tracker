@@ -1,20 +1,40 @@
 import 'package:expense_tracker/models/expense.dart';
+import 'package:expense_tracker/services/category_storage.dart';
 import 'package:flutter/material.dart';
 import 'chart_bar.dart';
+import 'package:expense_tracker/models/category.dart';
 
-class Chart extends StatelessWidget {
+class Chart extends StatefulWidget {
   const Chart({super.key, required this.expenses});
 
   final List<Expense> expenses;
+@override
+  State<Chart> createState() => _ChartState();
 
-  List<ExpenseBucket> get buckets {
-    return [
-      ExpenseBucket.forCategory(expenses, Category.lakocieDlaLakoci),
-      ExpenseBucket.forCategory(expenses, Category.jedzenie),
-      ExpenseBucket.forCategory(expenses, Category.wycieczkaaa),
-      ExpenseBucket.forCategory(expenses, Category.inne),
-    ];
+}
+
+class _ChartState extends State<Chart>{
+
+   List<ExpenseBucket> get buckets {
+    for(var i=0; i<_registeredCategories.length; i++)
+    {
+      ExpenseBucket.forCategory(widget.expenses, _registeredCategories[i]);
+    }
+    throw 'Nie ma nawet kategorii pieniążkowych!';
+
+    
   }
+
+  @override
+  void initState() {
+      CategoryStorage.load().then((loadedCategories) {
+    setState(() {
+      _registeredCategories = loadedCategories;
+    });
+  });
+    super.initState();
+  }
+  late List<Category> _registeredCategories;
 
   double get maxTotalExpense {
     double maxTotalExpense = 0;
@@ -28,8 +48,6 @@ class Chart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode =
-        MediaQuery.of(context).platformBrightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.symmetric(
@@ -78,14 +96,6 @@ class Chart extends StatelessWidget {
                   (bucket) => Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Icon(
-                        categoryIcons[bucket.category],
-                        color: isDarkMode
-                            ? Theme.of(context).colorScheme.secondary
-                            : Theme.of(
-                                context,
-                              ).colorScheme.primary.withValues(alpha: 0.7),
-                      ),
                     ),
                   ),
                 )
@@ -95,4 +105,5 @@ class Chart extends StatelessWidget {
       ),
     );
   }
+
 }
