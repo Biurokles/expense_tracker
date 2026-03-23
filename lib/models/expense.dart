@@ -56,7 +56,7 @@ class ExpenseBucket {
 
   ExpenseBucket.forCategory(List<Expense> allExpenses, this.category)
     : expenses = allExpenses
-          .where((expense) => expense.category == category)
+          .where((expense) => expense.category.name == category.name)
           .where((expense) => expense.date.month == DateTime.now().month)
           .toList();
   final Category category;

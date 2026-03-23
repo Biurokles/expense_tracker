@@ -2,18 +2,26 @@ import 'package:flutter/material.dart';
 
 class Category {
   Category({
-    this.maxAmount=100,
+    this.maxAmount = 100,
     required this.name,
     required this.color,
   });
   final Color color;
-  final int maxAmount;
+  final double maxAmount;
   final String name;
+
+  int colorToJson(Color color) {
+    return color.toARGB32();
+  }
+
+  static Color colorFromJson(int value) {
+    return Color(value);
+  }
 
   Map<String, dynamic> toJson() {
     return {
       'name': name,
-      'color':color,
+      'color': colorToJson(color),
       'maxAmount': maxAmount,
     };
   }
@@ -22,7 +30,7 @@ class Category {
     return Category(
       name: json['name'],
       maxAmount: json['maxAmount'],
-      color: json['color'],
+      color: colorFromJson(json['color']),
     );
   }
 }

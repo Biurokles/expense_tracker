@@ -8,6 +8,7 @@ class NewExpense extends StatefulWidget {
   const NewExpense({super.key, required this.onAddExpense});
 
   final void Function(Expense expense) onAddExpense;
+  
   @override
   State<NewExpense> createState() {
     return _NewExpenseState();

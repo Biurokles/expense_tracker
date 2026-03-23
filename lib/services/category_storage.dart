@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:expense_tracker/models/category.dart';
 
 class CategoryStorage {
-  static const _key = 'expenses';
+  static const _key = 'categories';
 
    static Future<void> save(List<Category> categories) async {
     final prefs = await SharedPreferences.getInstance();

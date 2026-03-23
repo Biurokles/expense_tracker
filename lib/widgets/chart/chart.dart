@@ -8,33 +8,28 @@ class Chart extends StatefulWidget {
   const Chart({super.key, required this.expenses});
 
   final List<Expense> expenses;
-@override
+  @override
   State<Chart> createState() => _ChartState();
-
 }
 
-class _ChartState extends State<Chart>{
-
-   List<ExpenseBucket> get buckets {
-    for(var i=0; i<_registeredCategories.length; i++)
-    {
-      ExpenseBucket.forCategory(widget.expenses, _registeredCategories[i]);
-    }
-    throw 'Nie ma nawet kategorii pieniążkowych!';
-
-    
+class _ChartState extends State<Chart> {
+  List<ExpenseBucket> get buckets {
+    return _registeredCategories.map((category) {
+      return ExpenseBucket.forCategory(widget.expenses, category);
+    }).toList();
   }
 
   @override
   void initState() {
-      CategoryStorage.load().then((loadedCategories) {
-    setState(() {
-      _registeredCategories = loadedCategories;
+    CategoryStorage.load().then((loadedCategories) {
+      setState(() {
+        _registeredCategories = loadedCategories;
+      });
     });
-  });
     super.initState();
   }
-  late List<Category> _registeredCategories;
+
+  List<Category> _registeredCategories = [];
 
   double get maxTotalExpense {
     double maxTotalExpense = 0;
@@ -76,13 +71,14 @@ class _ChartState extends State<Chart>{
                 if (maxTotalExpense == 0)
                   (Center(
                     child: Text(
-                      "Ufff, ja już myślałem że wydajesz nasze pieniążki w tym miesiącu",
+                      "Ufff, ja już myślałem że wydajesz nasze pieniążki w tym miesiącu ${maxTotalExpense}",
                     ),
                   ))
                 else
                   for (final bucket in buckets)
                     ChartBar(
                       fill: bucket.totalExpenses / maxTotalExpense,
+                      color: bucket.category.color,
                     ),
               ],
             ),
@@ -96,6 +92,9 @@ class _ChartState extends State<Chart>{
                   (bucket) => Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Text(
+                        '${bucket.category.name} ${bucket.totalExpenses} / ${bucket.category.maxAmount}',
+                      ),
                     ),
                   ),
                 )
@@ -105,5 +104,4 @@ class _ChartState extends State<Chart>{
       ),
     );
   }
-
 }

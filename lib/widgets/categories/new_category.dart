@@ -1,10 +1,12 @@
-import 'package:expense_tracker/services/category_storage.dart';
+import 'package:expense_tracker/models/category.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class NewCategory extends StatefulWidget {
-  const NewCategory({super.key});
+  const NewCategory({super.key, required this.onAddCategory});
+
+  final void Function(Category category) onAddCategory;
 
   @override
   State<StatefulWidget> createState() {
@@ -26,26 +28,6 @@ class _NewCategoryState extends State<NewCategory> {
             pickerColor: pickerColor,
             onColorChanged: changeColor,
           ),
-
-          // Use Material color picker:
-          //
-          // child: MaterialPicker(
-          //   pickerColor: pickerColor,
-          //   onColorChanged: changeColor,
-          //   showLabel: true, // only on portrait mode
-          // ),
-          //
-          // Use Block color picker:
-          //
-          // child: BlockPicker(
-          //   pickerColor: currentColor,
-          //   onColorChanged: changeColor,
-          // ),
-          //
-          // child: MultipleChoiceBlockPicker(
-          //   pickerColors: currentColors,
-          //   onColorsChanged: changeColors,
-          // ),
         ),
         actions: <Widget>[
           ElevatedButton(
@@ -67,6 +49,39 @@ class _NewCategoryState extends State<NewCategory> {
   final _amountController = TextEditingController();
   final _titleController = TextEditingController();
 
+  void _submitCategoryData() {
+    final enteredAmount = double.tryParse(_amountController.text);
+    final amountisInvalid = enteredAmount == null || enteredAmount <= 0;
+    if (_titleController.text.trim().isEmpty && amountisInvalid) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text('womp womp'),
+          content: const Text(
+            'Łiła! Wpisałaś nie tak jak trzeba, popraw to dobsie?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("dobsie dobsie"),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+    widget.onAddCategory(
+      Category(
+        name: _titleController.text,
+        maxAmount: double.parse(_amountController.text),
+        color: currentColor,
+      ),
+    );
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -80,7 +95,9 @@ class _NewCategoryState extends State<NewCategory> {
                   controller: _titleController,
                   maxLength: 50,
                   decoration: const InputDecoration(
-                    label: Text('i na co tym razem chcesz wydawać nasze pieniążki'),
+                    label: Text(
+                      'i na co tym razem chcesz wydawać nasze pieniążki',
+                    ),
                   ),
                 ),
               ),
@@ -126,8 +143,8 @@ class _NewCategoryState extends State<NewCategory> {
               ),
               const Spacer(),
               ElevatedButton(
-                onPressed: () {},
-                child: Text('Zaaapiiisz'),
+                onPressed: _submitCategoryData,
+                child: Text('Zapisz'),
               ),
               const SizedBox(
                 width: 10,
@@ -138,7 +155,7 @@ class _NewCategoryState extends State<NewCategory> {
                   _amountController.clear();
                   _titleController.clear();
                 },
-                child: Text('Nie Zapisuuuj'),
+                child: Text('Nia'),
               ),
             ],
           ),

@@ -1,3 +1,5 @@
+import 'package:expense_tracker/models/category.dart';
+import 'package:expense_tracker/services/category_storage.dart';
 import 'package:expense_tracker/services/expense_storage.dart';
 import 'package:expense_tracker/widgets/categories/new_category.dart';
 import 'package:expense_tracker/widgets/chart/chart.dart';
@@ -25,9 +27,16 @@ class _ExpensesState extends State<Expenses> {
         _registeredExpenses = loadedExpenses;
       });
     });
+
+        CategoryStorage.load().then((loadedCategories) {
+      setState(() {
+        _registeredCategories = loadedCategories;
+      });
+    });
   }
 
-  late List<Expense> _registeredExpenses;
+  List<Expense> _registeredExpenses = [];
+  List<Category> _registeredCategories = [];
 
   void _openAddExpensesOverlay() {
     showModalBottomSheet(
@@ -85,9 +94,17 @@ class _ExpensesState extends State<Expenses> {
       useSafeArea: true,
       isScrollControlled: true,
       context: context,
-      builder: (ctx) => NewCategory(),
+      builder: (ctx) => NewCategory(onAddCategory: _addOrModifyCategory),
     );
   }
+
+  void _addOrModifyCategory(Category category) {
+    setState(() {
+      _registeredCategories.add(category);
+      CategoryStorage.save(_registeredCategories);
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
