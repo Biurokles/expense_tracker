@@ -27,10 +27,10 @@ class CategoryStorage {
         .toList();
   }
 
-    static Future<void> delete(String name) async {
+    static Future<void> delete(String id) async {
     final categories = await load();
 
-    categories.removeWhere((e) => e.name == name);
+    categories.removeWhere((e) => e.id == id);
 
     await save(categories);
   }

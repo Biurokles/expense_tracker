@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/widgets/expenses.dart';
-//import 'package:flutter/services.dart';
-
 
 var kColorScheme = ColorScheme.fromSeed(seedColor: Colors.blue);
 var kDarkColorScheme = ColorScheme.fromSeed(
@@ -9,13 +7,19 @@ var kDarkColorScheme = ColorScheme.fromSeed(
   seedColor: Colors.deepPurple,
 );
 
-void main() {
-  // WidgetsFlutterBinding.ensureInitialized();
-  // SystemChrome.setPreferredOrientations([
-  //   DeviceOrientation.portraitUp
-  // ]).then((fn){
-    runApp(
-MaterialApp(
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Future.delayed(const Duration(seconds: 1));
+
+  runApp(const MyApp());
+}
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
       darkTheme: ThemeData.dark().copyWith(
         colorScheme: kDarkColorScheme,
         cardTheme: const CardThemeData().copyWith(
@@ -54,11 +58,22 @@ MaterialApp(
       ),
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.system,
-      home: const Expenses(),
-    ));
-  //});
+      home: Stack(
+  children: [
+    Positioned.fill(
+      child: Image.asset(
+        'assets/background.jpg',
+        fit: BoxFit.cover,
+      ),
+    ),
+    Positioned.fill(
+      child: Container(
+        color: Colors.black.withValues(alpha: 0.9), // 🔥 przyciemnia
+      ),
+    ),
+    const Expenses(),
+  ],
+),
+    );
+  }
 }
-  
-
-
-

@@ -3,12 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:expense_tracker/models/expense.dart";
 import 'package:expense_tracker/models/category.dart';
+import 'categories/category_dialog.dart';
 
 class NewExpense extends StatefulWidget {
-  const NewExpense({super.key, required this.onAddExpense});
+  const NewExpense({
+    super.key,
+    required this.onAddExpense,
+    required this.onAddCategory,
+  });
 
   final void Function(Expense expense) onAddExpense;
-  
+  final void Function(Category category) onAddCategory;
+
   @override
   State<NewExpense> createState() {
     return _NewExpenseState();
@@ -19,20 +25,28 @@ class _NewExpenseState extends State<NewExpense> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
 
-  @override
-  void initState() {
-    CategoryStorage.load().then((loadedCategories) {
-      setState(() {
-        _registeredCategories = loadedCategories;
-        _selectedCategory = _registeredCategories[0];
-      });
-    });
-    super.initState();
-  }
+@override
+void initState() {
+  super.initState();
+  loadAll();
+}
 
-  late List<Category> _registeredCategories;
+Future<void> loadAll() async {
+  final loadedCategories = await CategoryStorage.load();
+
+  setState(() {
+    _registeredCategories = loadedCategories;
+
+    // 🔥 ustaw domyślną kategorię PO załadowaniu
+    if (_selectedCategory == null && loadedCategories.isNotEmpty) {
+      _selectedCategory = loadedCategories[0];
+    }
+  });
+}
+
   Category? _selectedCategory;
   DateTime? _selectedDate;
+  List<Category> _registeredCategories = [];
 
   void _presentDatePicker() async {
     final now = DateTime.now();
@@ -48,11 +62,33 @@ class _NewExpenseState extends State<NewExpense> {
     });
   }
 
+void _openDialog({Category? existing}) async {
+  final result = await showCategoryDialog(context, existing: existing);
+
+  if (result != null) {
+    widget.onAddCategory(result);
+
+    final loadedCategories = await CategoryStorage.load();
+
+    setState(() {
+      _registeredCategories = loadedCategories;
+
+      _selectedCategory = loadedCategories.firstWhere(
+        (c) => c.id == result.id,
+        orElse: () => loadedCategories.first,
+      );
+    });
+  }
+}
+
   void _submitExpenseData() {
     final enteredAmount = double.tryParse(_amountController.text);
-    final amountisInvalid = enteredAmount == null || enteredAmount <= 0;
-    if (_titleController.text.trim().isEmpty && amountisInvalid ||
-        _selectedDate == null) {
+
+    final amountIsInvalid = enteredAmount == null || enteredAmount <= 0;
+
+    final titleIsInvalid = _titleController.text.trim().isEmpty;
+
+    if (titleIsInvalid || amountIsInvalid || _selectedDate == null) {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -72,14 +108,16 @@ class _NewExpenseState extends State<NewExpense> {
       );
       return;
     }
+
     widget.onAddExpense(
       Expense(
         title: _titleController.text,
-        amount: double.parse(_amountController.text),
+        amount: enteredAmount,
         date: _selectedDate!,
         category: _selectedCategory!,
       ),
     );
+
     Navigator.pop(context);
   }
 
@@ -172,18 +210,31 @@ class _NewExpenseState extends State<NewExpense> {
                 onPressed: _selectedCategory != null
                     ? _submitExpenseData
                     : null,
-                child: Text('Zaaapiiisz'),
+                child: Text('Zapisz'),
               ),
               const SizedBox(
                 width: 10,
               ),
               ElevatedButton(
-                onPressed: _selectedCategory != null?() {
-                  Navigator.pop(context);
-                  _amountController.clear();
-                  _titleController.clear();
-                }: null,
-                child: Text('Nie Zapisuuuj'),
+                onPressed: _selectedCategory != null
+                    ? () {
+                        Navigator.pop(context);
+                        _amountController.clear();
+                        _titleController.clear();
+                      }
+                    : null,
+                child: Text('Nia'),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              SizedBox(
+                height: 10,
+              ),
+              IconButton(
+                onPressed: _openDialog,
+                icon: const Icon(Icons.add),
               ),
             ],
           ),

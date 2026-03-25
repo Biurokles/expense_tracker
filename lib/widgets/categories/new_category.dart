@@ -1,13 +1,18 @@
 import 'package:expense_tracker/models/category.dart';
+import 'package:expense_tracker/services/category_storage.dart';
+import 'package:expense_tracker/widgets/categories/categories_list.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-
+import 'category_dialog.dart';
 class NewCategory extends StatefulWidget {
-  const NewCategory({super.key, required this.onAddCategory});
+  const NewCategory({
+    super.key,
+    required this.onAddCategory,
+    required this.onDismissedCategory,
+  });
 
   final void Function(Category category) onAddCategory;
-
+final Future<bool> Function(Category category) onDismissedCategory;
   @override
   State<StatefulWidget> createState() {
     return _NewCategoryState();
@@ -18,148 +23,94 @@ class _NewCategoryState extends State<NewCategory> {
   Color currentColor = Color(0xff443a49);
   Color pickerColor = Color(0xff443a49);
 
-  void pickColor() {
-    showDialog(
+  @override
+  void initState() {
+    super.initState();
+
+    CategoryStorage.load().then((loadedCategories) {
+      setState(() {
+        _registeredCategories = loadedCategories;
+      });
+    });
+  }
+
+  List<Category> _registeredCategories = [];
+
+  Future<Color?> pickColor() async {
+    Color tempColor = pickerColor;
+
+    final result = await showDialog<Color>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Pick a color!'),
-        content: SingleChildScrollView(
-          child: ColorPicker(
-            pickerColor: pickerColor,
-            onColorChanged: changeColor,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Pick a color!'),
+          content: SingleChildScrollView(
+            child: ColorPicker(
+              pickerColor: tempColor,
+              onColorChanged: (color) {
+                tempColor = color;
+              },
+            ),
           ),
-        ),
-        actions: <Widget>[
-          ElevatedButton(
-            child: const Text('Juuuż'),
-            onPressed: () {
-              setState(() => currentColor = pickerColor);
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Juuuż'),
+              onPressed: () {
+                Navigator.of(context).pop(tempColor);
+              },
+            ),
+          ],
+        );
+      },
     );
+
+    return result;
   }
 
   void changeColor(Color color) {
     setState(() => pickerColor = color);
   }
 
-  final _amountController = TextEditingController();
-  final _titleController = TextEditingController();
+void _openDialog({Category? existing}) async {
+  final result = await showCategoryDialog(context, existing: existing);
 
-  void _submitCategoryData() {
-    final enteredAmount = double.tryParse(_amountController.text);
-    final amountisInvalid = enteredAmount == null || enteredAmount <= 0;
-    if (_titleController.text.trim().isEmpty && amountisInvalid) {
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text('womp womp'),
-          content: const Text(
-            'Łiła! Wpisałaś nie tak jak trzeba, popraw to dobsie?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text("dobsie dobsie"),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
-    widget.onAddCategory(
-      Category(
-        name: _titleController.text,
-        maxAmount: double.parse(_amountController.text),
-        color: currentColor,
-      ),
-    );
-    Navigator.pop(context);
+  if (result != null) {
+    widget.onAddCategory(result);
+
+    final loadedCategories = await CategoryStorage.load();
+    setState(() {
+      _registeredCategories = loadedCategories;
+    });
   }
+}
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsetsGeometry.fromLTRB(16, 48, 16, 16),
-      child: Column(
-        children: [
-          Row(
-            children: [
+      
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            IconButton(
+              onPressed: _openDialog,
+              icon: const Icon(Icons.add),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            if (_registeredCategories.isNotEmpty)
               Expanded(
-                child: TextField(
-                  controller: _titleController,
-                  maxLength: 50,
-                  decoration: const InputDecoration(
-                    label: Text(
-                      'i na co tym razem chcesz wydawać nasze pieniążki',
-                    ),
-                  ),
+                child: CategoriesList(
+                  categories: _registeredCategories,
+                  onRemoveCategory: widget.onDismissedCategory,
+                  onClickCategory: _openDialog,
                 ),
               ),
-              const SizedBox(
-                width: 10,
-              ),
-              Expanded(
-                child: TextField(
-                  controller: _amountController,
-                  maxLength: 10,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
-                  ],
-                  decoration: const InputDecoration(
-                    prefixText: 'polskich złociszy  ',
-                    label: Text(
-                      'Ile chcesz wydawać w miesiącu na tą kategorie?',
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          Row(
-            children: [
-              ElevatedButton(
-                onPressed: pickColor,
-                child: Text('Kolorki'),
-              ),
-              Container(
-                margin: EdgeInsets.only(left: 5),
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: currentColor,
-                  border: Border.all(
-                    color: Colors.white,
-                    width: 2,
-                  ),
-                ),
-              ),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: _submitCategoryData,
-                child: Text('Zapisz'),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _amountController.clear();
-                  _titleController.clear();
-                },
-                child: Text('Nia'),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

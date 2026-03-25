@@ -20,18 +20,16 @@ class Expenses extends StatefulWidget {
 class _ExpensesState extends State<Expenses> {
   @override
   void initState() {
+    loadAll();
     super.initState();
+  }
 
-    ExpenseStorage.load().then((loadedExpenses) {
-      setState(() {
-        _registeredExpenses = loadedExpenses;
-      });
-    });
-
-        CategoryStorage.load().then((loadedCategories) {
-      setState(() {
-        _registeredCategories = loadedCategories;
-      });
+  Future<void> loadAll() async {
+    final loadedExpenses = await ExpenseStorage.load();
+    final loadedCategories = await CategoryStorage.load();
+    setState(() {
+      _registeredExpenses = loadedExpenses;
+      _registeredCategories = loadedCategories;
     });
   }
 
@@ -43,7 +41,10 @@ class _ExpensesState extends State<Expenses> {
       useSafeArea: true,
       isScrollControlled: true,
       context: context,
-      builder: (ctx) => NewExpense(onAddExpense: _addExpense),
+      builder: (ctx) => NewExpense(
+        onAddExpense: _addExpense,
+        onAddCategory: _addOrModifyCategory,
+      ),
     );
   }
 
@@ -69,9 +70,10 @@ class _ExpensesState extends State<Expenses> {
         action: SnackBarAction(
           label: 'wydaj spowrotem',
           onPressed: () {
-            setState(() {
+            setState(() async {
               _registeredExpenses.insert(expenseIndex, expense);
               ExpenseStorage.save(_registeredExpenses);
+              await loadAll();
             });
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -89,22 +91,76 @@ class _ExpensesState extends State<Expenses> {
     );
   }
 
+Future<bool> _removeCategory(Category category) async {
+  bool isCategoryUsed(Category category) {
+    return _registeredExpenses.any(
+      (e) => e.category.name == category.name,
+    );
+  }
+
+  if (isCategoryUsed(category)) {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Powiązana kategoria'),
+        content: const Text(
+          'Łiła! Ta kategoria ma już zapisane wydatki...',
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Niaa'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Yes Yes'),
+          ),
+        ],
+      ),
+    );
+
+    if (result != true) return false;
+  }
+
+  setState(() {
+    _registeredCategories.remove(category);
+    _registeredExpenses.removeWhere(
+      (e) => e.category.name == category.name,
+    );
+  });
+
+ CategoryStorage.delete(category.id);
+ ExpenseStorage.deleteByCategory(category.id);
+
+  return true;
+}
+
   void _openAddCategoriesOverlay() {
     showModalBottomSheet(
       useSafeArea: true,
       isScrollControlled: true,
       context: context,
-      builder: (ctx) => NewCategory(onAddCategory: _addOrModifyCategory),
-    );
-  }
-
-  void _addOrModifyCategory(Category category) {
-    setState(() {
-      _registeredCategories.add(category);
-      CategoryStorage.save(_registeredCategories);
+      builder: (ctx) => NewCategory(
+        onAddCategory: _addOrModifyCategory,
+        onDismissedCategory: _removeCategory,
+      ),
+    ).then((_) {
+      loadAll();
     });
   }
 
+  void _addOrModifyCategory(Category category) async {
+    final index = _registeredCategories.indexWhere(
+      (c) => c.id == category.id,
+    );
+    if (index == -1) {
+      _registeredCategories.add(category);
+    } else {
+      _registeredCategories[index] = category;
+    }
+    CategoryStorage.save(_registeredCategories);
+    await loadAll();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +174,9 @@ class _ExpensesState extends State<Expenses> {
       );
     }
     return (Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         title: const Text(
           "Łakocia wydatki śledź",
         ),
@@ -136,7 +194,10 @@ class _ExpensesState extends State<Expenses> {
       body: Column(
         children: [
           _registeredExpenses.isNotEmpty
-              ? Chart(expenses: _registeredExpenses)
+              ? Chart(
+                  expenses: _registeredExpenses,
+                  registeredCategories: _registeredCategories,
+                )
               : Text(''),
           Expanded(child: mainContent),
         ],
