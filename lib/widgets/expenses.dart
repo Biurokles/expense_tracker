@@ -36,17 +36,41 @@ class _ExpensesState extends State<Expenses> {
   List<Expense> _registeredExpenses = [];
   List<Category> _registeredCategories = [];
 
-  void _openAddExpensesOverlay() {
-    showModalBottomSheet(
-      useSafeArea: true,
-      isScrollControlled: true,
-      context: context,
-      builder: (ctx) => NewExpense(
-        onAddExpense: _addExpense,
-        onAddCategory: _addOrModifyCategory,
-      ),
-    );
-  }
+void _openAddExpensesOverlay() {
+  showModalBottomSheet(
+    backgroundColor: Colors.transparent,
+    useSafeArea: true,
+    isScrollControlled: true,
+    context: context,
+    builder: (ctx) {
+      return ClipRRect(
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(20),
+        ),
+        child: Container(
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/expenses.jpg'),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: Container(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(ctx).viewInsets.bottom,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.8),
+            ),
+            child: NewExpense(
+              onAddExpense: _addExpense,
+              onAddCategory: _addOrModifyCategory,
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
 
   void _addExpense(Expense expense) {
     setState(() {
@@ -65,7 +89,7 @@ class _ExpensesState extends State<Expenses> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         persist: false,
-        duration: const Duration(seconds: 1),
+        duration: const Duration(seconds: 2),
         content: const Text('I do Oskroci wracają pieniązki Iiiii'),
         action: SnackBarAction(
           label: 'wydaj spowrotem',
@@ -135,19 +159,43 @@ Future<bool> _removeCategory(Category category) async {
   return true;
 }
 
-  void _openAddCategoriesOverlay() {
-    showModalBottomSheet(
-      useSafeArea: true,
-      isScrollControlled: true,
-      context: context,
-      builder: (ctx) => NewCategory(
-        onAddCategory: _addOrModifyCategory,
-        onDismissedCategory: _removeCategory,
-      ),
-    ).then((_) {
-      loadAll();
-    });
-  }
+void _openAddCategoriesOverlay() {
+  showModalBottomSheet(
+    backgroundColor: Colors.transparent,
+    useSafeArea: true,
+    isScrollControlled: true,
+    context: context,
+    builder: (ctx) {
+      return ClipRRect(
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(20),
+        ),
+        child: Container(
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/category.jpg'),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: Container(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(ctx).viewInsets.bottom,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.8), // overlay
+            ),
+            child: NewCategory(
+              onAddCategory: _addOrModifyCategory,
+              onDismissedCategory: _removeCategory,
+            ),
+          ),
+        ),
+      );
+    },
+  ).then((_) {
+    loadAll();
+  });
+}
 
   void _addOrModifyCategory(Category category) async {
     final index = _registeredCategories.indexWhere(

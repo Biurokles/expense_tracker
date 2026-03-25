@@ -37,7 +37,6 @@ Future<void> loadAll() async {
   setState(() {
     _registeredCategories = loadedCategories;
 
-    // 🔥 ustaw domyślną kategorię PO załadowaniu
     if (_selectedCategory == null && loadedCategories.isNotEmpty) {
       _selectedCategory = loadedCategories[0];
     }

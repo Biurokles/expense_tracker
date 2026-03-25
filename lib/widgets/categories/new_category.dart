@@ -1,9 +1,12 @@
 import 'package:expense_tracker/models/category.dart';
+import 'package:expense_tracker/models/expense.dart';
 import 'package:expense_tracker/services/category_storage.dart';
+import 'package:expense_tracker/services/expense_storage.dart';
 import 'package:expense_tracker/widgets/categories/categories_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'category_dialog.dart';
+
 class NewCategory extends StatefulWidget {
   const NewCategory({
     super.key,
@@ -12,7 +15,7 @@ class NewCategory extends StatefulWidget {
   });
 
   final void Function(Category category) onAddCategory;
-final Future<bool> Function(Category category) onDismissedCategory;
+  final Future<bool> Function(Category category) onDismissedCategory;
   @override
   State<StatefulWidget> createState() {
     return _NewCategoryState();
@@ -21,11 +24,18 @@ final Future<bool> Function(Category category) onDismissedCategory;
 
 class _NewCategoryState extends State<NewCategory> {
   Color currentColor = Color(0xff443a49);
-  Color pickerColor = Color(0xff443a49);
+  Color pickerColor = Color.fromRGBO(68, 58, 73, 1);
+  List<Expense> _registeredExpenses = [];
 
   @override
   void initState() {
     super.initState();
+
+    ExpenseStorage.load().then((loadedExpenses) {
+      setState(() {
+        _registeredExpenses = loadedExpenses;
+      });
+    });
 
     CategoryStorage.load().then((loadedCategories) {
       setState(() {
@@ -71,24 +81,24 @@ class _NewCategoryState extends State<NewCategory> {
     setState(() => pickerColor = color);
   }
 
-void _openDialog({Category? existing}) async {
-  final result = await showCategoryDialog(context, existing: existing);
+  void _openDialog({Category? existing}) async {
+    final result = await showCategoryDialog(context, existing: existing);
 
-  if (result != null) {
-    widget.onAddCategory(result);
+    if (result != null) {
+      widget.onAddCategory(result);
 
-    final loadedCategories = await CategoryStorage.load();
-    setState(() {
-      _registeredCategories = loadedCategories;
-    });
+      final loadedCategories = await CategoryStorage.load();
+      setState(() {
+        _registeredCategories = loadedCategories;
+      });
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsetsGeometry.fromLTRB(16, 48, 16, 16),
-      
+
       child: SizedBox(
         width: double.infinity,
         child: Column(
@@ -104,6 +114,7 @@ void _openDialog({Category? existing}) async {
             if (_registeredCategories.isNotEmpty)
               Expanded(
                 child: CategoriesList(
+                  expenses: _registeredExpenses,
                   categories: _registeredCategories,
                   onRemoveCategory: widget.onDismissedCategory,
                   onClickCategory: _openDialog,

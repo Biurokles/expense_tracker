@@ -46,14 +46,11 @@ dev_dependencies:
     sdk: flutter
 
 flutter_native_splash:
-  color: "#512DA8"
-  image: assets/logo.png
-  android_gravity: center
-  ios_content_mode: center
-
   android_15:
-  color: "#512DA8"
-  image: assets/logo.png
+    image: assets/logo.png
+    color: "#512DA8"
+
+  
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
@@ -69,6 +66,8 @@ flutter:
   assets:
     - assets/background.jpg
     - assets/logo.png
+    - assets/category.jpg
+    - assets/expenses.jpg
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
