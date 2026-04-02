@@ -25,26 +25,26 @@ class _NewExpenseState extends State<NewExpense> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
 
-@override
-void initState() {
-  super.initState();
-  loadAll();
-}
+  @override
+  void initState() {
+    super.initState();
+    loadAll();
+  }
 
-Future<void> loadAll() async {
-  final loadedCategories = await CategoryStorage.load();
+  Future<void> loadAll() async {
+    final loadedCategories = await CategoryStorage.load();
 
-  setState(() {
-    _registeredCategories = loadedCategories;
+    setState(() {
+      _registeredCategories = loadedCategories;
 
-    if (_selectedCategory == null && loadedCategories.isNotEmpty) {
-      _selectedCategory = loadedCategories[0];
-    }
-  });
-}
+      if (_selectedCategory == null && loadedCategories.isNotEmpty) {
+        _selectedCategory = loadedCategories[0];
+      }
+    });
+  }
 
   Category? _selectedCategory;
-  DateTime? _selectedDate;
+  DateTime? _selectedDate = DateTime.now();
   List<Category> _registeredCategories = [];
 
   void _presentDatePicker() async {
@@ -52,7 +52,7 @@ Future<void> loadAll() async {
     final firstDate = DateTime(now.year - 1, now.month, now.day);
     final pickedDate = await showDatePicker(
       context: context,
-      initialDate: now,
+      initialDate: DateTime.now(),
       firstDate: firstDate,
       lastDate: now,
     );
@@ -61,24 +61,24 @@ Future<void> loadAll() async {
     });
   }
 
-void _openDialog({Category? existing}) async {
-  final result = await showCategoryDialog(context, existing: existing);
+  void _openDialog({Category? existing}) async {
+    final result = await showCategoryDialog(context, existing: existing);
 
-  if (result != null) {
-    widget.onAddCategory(result);
+    if (result != null) {
+      widget.onAddCategory(result);
 
-    final loadedCategories = await CategoryStorage.load();
+      final loadedCategories = await CategoryStorage.load();
 
-    setState(() {
-      _registeredCategories = loadedCategories;
+      setState(() {
+        _registeredCategories = loadedCategories;
 
-      _selectedCategory = loadedCategories.firstWhere(
-        (c) => c.id == result.id,
-        orElse: () => loadedCategories.first,
-      );
-    });
+        _selectedCategory = loadedCategories.firstWhere(
+          (c) => c.id == result.id,
+          orElse: () => loadedCategories.first,
+        );
+      });
+    }
   }
-}
 
   void _submitExpenseData() {
     final enteredAmount = double.tryParse(_amountController.text);
@@ -205,15 +205,7 @@ void _openDialog({Category? existing}) async {
                       },
                     ),
               const Spacer(),
-              ElevatedButton(
-                onPressed: _selectedCategory != null
-                    ? _submitExpenseData
-                    : null,
-                child: Text('Zapisz'),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
+
               ElevatedButton(
                 onPressed: _selectedCategory != null
                     ? () {
@@ -223,6 +215,15 @@ void _openDialog({Category? existing}) async {
                       }
                     : null,
                 child: Text('Nia'),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              ElevatedButton(
+                onPressed: _selectedCategory != null
+                    ? _submitExpenseData
+                    : null,
+                child: Text('Zapisz'),
               ),
             ],
           ),

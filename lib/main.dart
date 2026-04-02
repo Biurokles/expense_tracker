@@ -14,6 +14,7 @@ void main() async {
 
   runApp(const MyApp());
 }
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -60,21 +61,21 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.system,
       home: Stack(
-  children: [
-    Positioned.fill(
-      child: Image.asset(
-        'assets/background.jpg',
-        fit: BoxFit.cover,
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/background.jpg',
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withValues(alpha: 0.9), // 🔥 przyciemnia
+            ),
+          ),
+          const Expenses(),
+        ],
       ),
-    ),
-    Positioned.fill(
-      child: Container(
-        color: Colors.black.withValues(alpha: 0.9), // 🔥 przyciemnia
-      ),
-    ),
-    const Expenses(),
-  ],
-),
     );
   }
 }

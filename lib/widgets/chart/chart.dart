@@ -8,8 +8,10 @@ class Chart extends StatefulWidget {
     super.key,
     required this.expenses,
     required this.registeredCategories,
+    required this.changeExpensesRange,
   });
 
+  final void Function(TimeRange range) changeExpensesRange;
   final List<Expense> expenses;
   final List<Category> registeredCategories;
 
@@ -19,8 +21,6 @@ class Chart extends StatefulWidget {
 
 class _ChartState extends State<Chart> {
   TimeRange selectedRange = TimeRange.month;
-
-  DateTime get selectedDate => DateTime.now();
 
   List<ExpenseBucket> get buckets {
     return widget.registeredCategories.map((category) {
@@ -89,16 +89,28 @@ class _ChartState extends State<Chart> {
   }
 
   double get todayExpenses {
-    final now = DateTime.now();
+    var now = DateTime.now();
 
-    return widget.expenses
-        .where(
-          (e) =>
-              e.date.year == now.year &&
-              e.date.month == now.month &&
-              e.date.day == now.day,
-        )
-        .fold(0, (sum, e) => sum + e.amount);
+    switch (selectedRange) {
+      case TimeRange.day:
+        return widget.expenses
+            .where(
+              (e) => e.date.day == now.day,
+            )
+            .fold(0, (sum, e) => sum + e.amount);
+      case TimeRange.month:
+        return widget.expenses
+            .where(
+              (e) => e.date.month == now.month,
+            )
+            .fold(0, (sum, e) => sum + e.amount);
+      case TimeRange.year:
+        return widget.expenses
+            .where(
+              (e) => e.date.year == now.year,
+            )
+            .fold(0, (sum, e) => sum + e.amount);
+    }
   }
 
   Widget buildLegend() {
@@ -144,24 +156,34 @@ class _ChartState extends State<Chart> {
     );
   }
 
-
   String get emptyChartMessage {
-  switch (selectedRange) {
-    case TimeRange.day:
-      return "Łiła! Dzisiaj jeszcze nic nie kupiłaś! Jakby girl!";
-    case TimeRange.month:
-      return "Najwyraźniej nie przyszła jeszcze wypłata";
-    case TimeRange.year:
-      return "Uuu to chyba nowy rok, że tak nic nie kupujesz";
+    switch (selectedRange) {
+      case TimeRange.day:
+        return "Łiła! Dzisiaj jeszcze nic nie kupiłaś! Jakby girl!";
+      case TimeRange.month:
+        return "Najwyraźniej nie przyszła jeszcze wypłata";
+      case TimeRange.year:
+        return "Uuu to chyba nowy rok, że tak nic nie kupujesz";
+    }
   }
-}
+
+  String get rangeText {
+    switch (selectedRange) {
+      case TimeRange.day:
+        widget.changeExpensesRange(TimeRange.day);
+        return 'Dzisiaj';
+      case TimeRange.month:
+        widget.changeExpensesRange(TimeRange.month);
+        return 'W tym miesiącu';
+      case TimeRange.year:
+        widget.changeExpensesRange(TimeRange.year);
+        return 'W tym roku';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final total = totalExpensesSum;
-
-
-    
 
     return Container(
       margin: const EdgeInsets.all(16),
@@ -186,7 +208,7 @@ class _ChartState extends State<Chart> {
           SizedBox(
             height: 220,
             child: total == 0
-                ?  Center(child: Text(emptyChartMessage))
+                ? Center(child: Text(emptyChartMessage))
                 : Stack(
                     alignment: Alignment.center,
                     children: [
@@ -201,8 +223,8 @@ class _ChartState extends State<Chart> {
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text(
-                            "Dzisiaj",
+                          Text(
+                            rangeText,
                             style: TextStyle(fontSize: 12),
                           ),
                           Text(

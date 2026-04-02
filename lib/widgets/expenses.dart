@@ -28,7 +28,9 @@ class _ExpensesState extends State<Expenses> {
     final loadedExpenses = await ExpenseStorage.load();
     final loadedCategories = await CategoryStorage.load();
     setState(() {
-      _registeredExpenses = loadedExpenses;
+      _registeredExpenses = loadedExpenses
+          .where((e) => e.date.day == DateTime.now().day)
+          .toList();
       _registeredCategories = loadedCategories;
     });
   }
@@ -36,41 +38,52 @@ class _ExpensesState extends State<Expenses> {
   List<Expense> _registeredExpenses = [];
   List<Category> _registeredCategories = [];
 
-void _openAddExpensesOverlay() {
-  showModalBottomSheet(
-    backgroundColor: Colors.transparent,
-    useSafeArea: true,
-    isScrollControlled: true,
-    context: context,
-    builder: (ctx) {
-      return ClipRRect(
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(20),
-        ),
-        child: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/expenses.jpg'),
-              fit: BoxFit.cover,
-            ),
+  void changeRange(TimeRange range) {
+    switch (range) {
+      case TimeRange.day:
+        return;
+      case TimeRange.month:
+        return;
+      case TimeRange.year:
+        return;
+    }
+  }
+
+  void _openAddExpensesOverlay() {
+    showModalBottomSheet(
+      backgroundColor: Colors.transparent,
+      useSafeArea: true,
+      isScrollControlled: true,
+      context: context,
+      builder: (ctx) {
+        return ClipRRect(
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(20),
           ),
           child: Container(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(ctx).viewInsets.bottom,
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/expenses.jpg'),
+                fit: BoxFit.cover,
+              ),
             ),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.8),
-            ),
-            child: NewExpense(
-              onAddExpense: _addExpense,
-              onAddCategory: _addOrModifyCategory,
+            child: Container(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(ctx).viewInsets.bottom,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.8),
+              ),
+              child: NewExpense(
+                onAddExpense: _addExpense,
+                onAddCategory: _addOrModifyCategory,
+              ),
             ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
   void _addExpense(Expense expense) {
     setState(() {
@@ -115,87 +128,87 @@ void _openAddExpensesOverlay() {
     );
   }
 
-Future<bool> _removeCategory(Category category) async {
-  bool isCategoryUsed(Category category) {
-    return _registeredExpenses.any(
-      (e) => e.category.name == category.name,
-    );
-  }
+  Future<bool> _removeCategory(Category category) async {
+    bool isCategoryUsed(Category category) {
+      return _registeredExpenses.any(
+        (e) => e.category.name == category.name,
+      );
+    }
 
-  if (isCategoryUsed(category)) {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text('Powiązana kategoria'),
-        content: const Text(
-          'Łiła! Ta kategoria ma już zapisane wydatki...',
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Niaa'),
+    if (isCategoryUsed(category)) {
+      final result = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('Powiązana kategoria'),
+          content: const Text(
+            'Łiła! Ta kategoria ma już zapisane wydatki...',
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Yes Yes'),
-          ),
-        ],
-      ),
-    );
-
-    if (result != true) return false;
-  }
-
-  setState(() {
-    _registeredCategories.remove(category);
-    _registeredExpenses.removeWhere(
-      (e) => e.category.name == category.name,
-    );
-  });
-
- CategoryStorage.delete(category.id);
- ExpenseStorage.deleteByCategory(category.id);
-
-  return true;
-}
-
-void _openAddCategoriesOverlay() {
-  showModalBottomSheet(
-    backgroundColor: Colors.transparent,
-    useSafeArea: true,
-    isScrollControlled: true,
-    context: context,
-    builder: (ctx) {
-      return ClipRRect(
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(20),
-        ),
-        child: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/category.jpg'),
-              fit: BoxFit.cover,
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Niaa'),
             ),
-          ),
-          child: Container(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(ctx).viewInsets.bottom,
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Yes Yes'),
             ),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.8), // overlay
-            ),
-            child: NewCategory(
-              onAddCategory: _addOrModifyCategory,
-              onDismissedCategory: _removeCategory,
-            ),
-          ),
+          ],
         ),
       );
-    },
-  ).then((_) {
-    loadAll();
-  });
-}
+
+      if (result != true) return false;
+    }
+
+    setState(() {
+      _registeredCategories.remove(category);
+      _registeredExpenses.removeWhere(
+        (e) => e.category.name == category.name,
+      );
+    });
+
+    CategoryStorage.delete(category.id);
+    ExpenseStorage.deleteByCategory(category.id);
+
+    return true;
+  }
+
+  void _openAddCategoriesOverlay() {
+    showModalBottomSheet(
+      backgroundColor: Colors.transparent,
+      useSafeArea: true,
+      isScrollControlled: true,
+      context: context,
+      builder: (ctx) {
+        return ClipRRect(
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(20),
+          ),
+          child: Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/category.jpg'),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: Container(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(ctx).viewInsets.bottom,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.8), // overlay
+              ),
+              child: NewCategory(
+                onAddCategory: _addOrModifyCategory,
+                onDismissedCategory: _removeCategory,
+              ),
+            ),
+          ),
+        );
+      },
+    ).then((_) {
+      loadAll();
+    });
+  }
 
   void _addOrModifyCategory(Category category) async {
     final index = _registeredCategories.indexWhere(
@@ -245,6 +258,7 @@ void _openAddCategoriesOverlay() {
               ? Chart(
                   expenses: _registeredExpenses,
                   registeredCategories: _registeredCategories,
+                  changeExpensesRange: changeRange,
                 )
               : Text(''),
           Expanded(child: mainContent),
