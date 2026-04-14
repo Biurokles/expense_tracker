@@ -1,7 +1,9 @@
+import 'package:expense_tracker/provider/category/state/category_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:expense_tracker/models/category.dart';
+import 'package:expense_tracker/data/models/category/category.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Future<Category?> showCategoryDialog(
   BuildContext context, {
@@ -12,7 +14,9 @@ Future<Category?> showCategoryDialog(
     text: existing?.maxAmount.toString() ?? '',
   );
 
-  Color dialogColor = existing?.color ?? const Color(0xff443a49);
+  Color dialogColor = existing != null
+      ? Color(existing.color)
+      : const Color(0xff443a49);
   final formKey = GlobalKey<FormState>();
 
   Future<Color?> pickColor() async {
@@ -128,26 +132,45 @@ Future<Category?> showCategoryDialog(
                 onPressed: () => Navigator.pop(ctx),
                 child: const Text('Nia'),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  if (!formKey.currentState!.validate()) return;
+              Consumer(
+                builder: (context, ref, child) {
+                  return Column(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          if (!formKey.currentState!.validate()) return;
 
-                  final cat = existing != null
-                      ? Category(
-                          id: existing.id,
-                          name: titleController.text,
-                          color: dialogColor,
-                          maxAmount: double.parse(maxAmountController.text),
-                        )
-                      : Category(
-                          name: titleController.text,
-                          color: dialogColor,
-                          maxAmount: double.parse(maxAmountController.text),
-                        );
-
-                  Navigator.pop(ctx, cat);
+                          existing != null
+                              ? ref
+                                    .read(categoryProvider.notifier)
+                                    .updateCategory(
+                                      Category(
+                                        id: existing.id,
+                                        name: titleController.text,
+                                        color: dialogColor.toARGB32(),
+                                        maxAmount: double.parse(
+                                          maxAmountController.text,
+                                        ),
+                                      ),
+                                    )
+                              : ref
+                                    .read(categoryProvider.notifier)
+                                    .updateCategory(
+                                      Category(
+                                        name: titleController.text,
+                                        color: dialogColor.toARGB32(),
+                                        maxAmount: double.parse(
+                                          maxAmountController.text,
+                                        ),
+                                      ),
+                                    );
+                          Navigator.pop(ctx);
+                        },
+                        child: const Text('Zapisz'),
+                      ),
+                    ],
+                  );
                 },
-                child: const Text('Zapisz'),
               ),
             ],
           );

@@ -1,5 +1,9 @@
+import 'package:expense_tracker/data/models/category/category.dart' as models;
+import 'package:expense_tracker/data/models/expense/expense.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/widgets/expenses.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 var kColorScheme = ColorScheme.fromSeed(seedColor: Colors.blue);
 var kDarkColorScheme = ColorScheme.fromSeed(
@@ -10,9 +14,13 @@ var kDarkColorScheme = ColorScheme.fromSeed(
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Future.delayed(const Duration(seconds: 1));
+  await Hive.initFlutter();
+  Hive.registerAdapter(models.CategoryAdapter());
+  Hive.registerAdapter(ExpenseAdapter());
+  await Hive.openBox<models.Category>('categories');
+  await Hive.openBox<Expense>('expenses');
 
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {

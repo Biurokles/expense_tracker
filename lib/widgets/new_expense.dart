@@ -1,106 +1,82 @@
-import 'package:expense_tracker/services/category_storage.dart';
+import 'package:expense_tracker/provider/category/state/category_notifier.dart';
+import 'package:expense_tracker/provider/expense/state/expense_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import "package:expense_tracker/models/expense.dart";
-import 'package:expense_tracker/models/category.dart';
+import "package:expense_tracker/data/models/expense/expense.dart";
+import 'package:expense_tracker/data/models/category/category.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'categories/category_dialog.dart';
 
-class NewExpense extends StatefulWidget {
-  const NewExpense({
-    super.key,
-    required this.onAddExpense,
-    required this.onAddCategory,
-  });
-
-  final void Function(Expense expense) onAddExpense;
-  final void Function(Category category) onAddCategory;
+class NewExpense extends ConsumerStatefulWidget {
+  const NewExpense({super.key});
 
   @override
-  State<NewExpense> createState() {
-    return _NewExpenseState();
-  }
+  ConsumerState<NewExpense> createState() => _NewExpenseState();
 }
 
-class _NewExpenseState extends State<NewExpense> {
+class _NewExpenseState extends ConsumerState<NewExpense> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
+
+  Category? _selectedCategory;
+  DateTime? _selectedDate = DateTime.now();
 
   @override
   void initState() {
     super.initState();
-    loadAll();
-  }
 
-  Future<void> loadAll() async {
-    final loadedCategories = await CategoryStorage.load();
+    Future.microtask(() {
+      final categoriesAsync = ref.read(categoryProvider);
 
-    setState(() {
-      _registeredCategories = loadedCategories;
+      categoriesAsync.whenData((categories) {
+        if (categories.isEmpty) return;
 
-      if (_selectedCategory == null && loadedCategories.isNotEmpty) {
-        _selectedCategory = loadedCategories[0];
-      }
+        if (_selectedCategory == null) {
+          setState(() {
+            _selectedCategory = categories.first;
+          });
+        }
+      });
     });
   }
-
-  Category? _selectedCategory;
-  DateTime? _selectedDate = DateTime.now();
-  List<Category> _registeredCategories = [];
 
   void _presentDatePicker() async {
     final now = DateTime.now();
     final firstDate = DateTime(now.year - 1, now.month, now.day);
+
     final pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: _selectedDate ?? now,
       firstDate: firstDate,
       lastDate: now,
     );
+
+    if (pickedDate == null) return;
+
     setState(() {
       _selectedDate = pickedDate;
     });
-  }
-
-  void _openDialog({Category? existing}) async {
-    final result = await showCategoryDialog(context, existing: existing);
-
-    if (result != null) {
-      widget.onAddCategory(result);
-
-      final loadedCategories = await CategoryStorage.load();
-
-      setState(() {
-        _registeredCategories = loadedCategories;
-
-        _selectedCategory = loadedCategories.firstWhere(
-          (c) => c.id == result.id,
-          orElse: () => loadedCategories.first,
-        );
-      });
-    }
   }
 
   void _submitExpenseData() {
     final enteredAmount = double.tryParse(_amountController.text);
 
     final amountIsInvalid = enteredAmount == null || enteredAmount <= 0;
-
     final titleIsInvalid = _titleController.text.trim().isEmpty;
 
-    if (titleIsInvalid || amountIsInvalid || _selectedDate == null) {
+    if (titleIsInvalid ||
+        amountIsInvalid ||
+        _selectedDate == null ||
+        _selectedCategory == null) {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: Text('womp womp'),
-          content: const Text(
-            'Łiła! Wpisałaś nie tak jak trzeba, popraw to dobsie?',
-          ),
+          title: const Text('womp womp'),
+          content: const Text('Popraw dane 😄'),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text("dobsie dobsie"),
+              onPressed: () => Navigator.pop(context),
+              child: const Text("OK"),
             ),
           ],
         ),
@@ -108,14 +84,16 @@ class _NewExpenseState extends State<NewExpense> {
       return;
     }
 
-    widget.onAddExpense(
-      Expense(
-        title: _titleController.text,
-        amount: enteredAmount,
-        date: _selectedDate!,
-        category: _selectedCategory!,
-      ),
-    );
+    ref
+        .read(expenseProvider.notifier)
+        .addExpense(
+          Expense(
+            title: _titleController.text,
+            amount: enteredAmount,
+            date: _selectedDate!,
+            category: _selectedCategory!,
+          ),
+        );
 
     Navigator.pop(context);
   }
@@ -129,17 +107,21 @@ class _NewExpenseState extends State<NewExpense> {
 
   @override
   Widget build(BuildContext context) {
+    final categoryState = ref.watch(categoryProvider);
+
     return Padding(
-      padding: const EdgeInsetsGeometry.fromLTRB(16, 48, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 48, 16, 16),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextField(
             controller: _titleController,
             maxLength: 50,
             decoration: const InputDecoration(
-              label: Text('i na co tym razem wydałaś nasze pieniążki'),
+              labelText: 'Na co wydałaś pieniądze?',
             ),
           ),
+
           Row(
             children: [
               Expanded(
@@ -150,93 +132,85 @@ class _NewExpenseState extends State<NewExpense> {
                     FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
                   ],
                   decoration: const InputDecoration(
-                    prefixText: 'polskich złociszy  ',
-                    label: Text('ILEEE??'),
+                    prefixText: 'PLN ',
+                    labelText: 'Ile?',
                   ),
                 ),
               ),
-              const SizedBox(
-                width: 16,
+
+              const SizedBox(width: 16),
+
+              Text(
+                _selectedDate == null
+                    ? 'Wybierz datę'
+                    : formatter.format(_selectedDate!),
               ),
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      _selectedDate == null
-                          ? 'i kieeedyyy'
-                          : formatter.format(_selectedDate!),
-                    ),
-                    IconButton(
-                      onPressed: _presentDatePicker,
-                      icon: const Icon(Icons.calendar_month),
-                    ),
-                  ],
-                ),
+
+              IconButton(
+                onPressed: _presentDatePicker,
+                icon: const Icon(Icons.calendar_month),
               ),
             ],
           ),
+
           const SizedBox(height: 16),
-          Row(
-            children: [
-              _selectedCategory == null
-                  ? Text("Łiła, nie ma tu żadnych kategorii")
-                  : DropdownButton(
+
+          categoryState.when(
+            data: (categories) {
+              if (_selectedCategory == null && categories.isNotEmpty) {
+                _selectedCategory = categories.first;
+              }
+
+              return Row(
+                children: [
+                  if (categories.isEmpty)
+                    const Text("Brak kategorii")
+                  else
+                    DropdownButton<Category>(
                       value: _selectedCategory,
-                      items: _registeredCategories
+                      hint: const Text("Wybierz kategorię"),
+                      items: categories
                           .map(
-                            (category) => DropdownMenuItem(
-                              value: category,
-                              child: Text(
-                                category.name,
-                              ),
+                            (c) => DropdownMenuItem(
+                              value: c,
+                              child: Text(c.name),
                             ),
                           )
                           .toList(),
                       onChanged: (value) {
                         setState(() {
-                          if (value == null) {
-                            return;
-                          } else {
-                            _selectedCategory = value;
-                          }
+                          _selectedCategory = value;
                         });
                       },
                     ),
-              const Spacer(),
 
-              ElevatedButton(
-                onPressed: _selectedCategory != null
-                    ? () {
-                        Navigator.pop(context);
-                        _amountController.clear();
-                        _titleController.clear();
-                      }
-                    : null,
-                child: Text('Nia'),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              ElevatedButton(
-                onPressed: _selectedCategory != null
-                    ? _submitExpenseData
-                    : null,
-                child: Text('Zapisz'),
-              ),
-            ],
+                  const Spacer(),
+
+                  ElevatedButton(
+                    onPressed: _selectedCategory != null
+                        ? _submitExpenseData
+                        : null,
+                    child: const Text('Zapisz'),
+                  ),
+                ],
+              );
+            },
+
+            loading: () => const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: LinearProgressIndicator(),
+            ),
+
+            error: (e, _) => Text('Error: $e'),
           ),
-          Row(
-            children: [
-              SizedBox(
-                height: 10,
-              ),
-              IconButton(
-                onPressed: _openDialog,
-                icon: const Icon(Icons.add),
-              ),
-            ],
+
+          const SizedBox(height: 8),
+
+          IconButton(
+            onPressed: () {
+              showCategoryDialog(context);
+            },
+            icon: const Icon(Icons.add),
           ),
         ],
       ),

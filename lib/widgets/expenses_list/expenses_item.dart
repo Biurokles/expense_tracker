@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:expense_tracker/models/expense.dart';
+import 'package:expense_tracker/data/models/expense/expense.dart';
 
 class ExpensesItem extends StatelessWidget {
   const ExpensesItem(this.expense, {super.key});
 
-
-  
-
   final Expense expense;
   @override
   Widget build(BuildContext context) {
-    
     return Card(
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -20,21 +16,27 @@ class ExpensesItem extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(expense.title,
-            style: Theme.of(context).textTheme.titleLarge,),
-            SizedBox(height: 4,),
+            Text(
+              expense.title,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            SizedBox(
+              height: 4,
+            ),
             Row(
               children: [
-                Text('\$ ${expense.amount}' ),
+                Text('\$ ${expense.amount}'),
                 Spacer(),
                 Row(
                   children: [
-                    const SizedBox(width: 8,),
-                    Text(expense.getFormattedDate)
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    Text(expense.getFormattedDate),
                   ],
-                )
+                ),
               ],
-            )
+            ),
           ],
         ),
       ),

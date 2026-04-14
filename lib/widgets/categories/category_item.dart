@@ -1,37 +1,35 @@
-import 'package:expense_tracker/models/category.dart';
-import 'package:expense_tracker/models/expense.dart';
+import 'package:expense_tracker/data/models/category/category.dart';
+import 'package:expense_tracker/data/models/time_range.dart';
+import 'package:expense_tracker/provider/expense/state/expense_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CategoryItem extends StatelessWidget {
+class CategoryItem extends ConsumerWidget {
   const CategoryItem({
     super.key,
-    required this.bucket,
-    required this.onCategoryClick,
+    required this.category,
   });
 
-  final ExpenseBucket bucket;
-  final void Function({Category? existing}) onCategoryClick;
-  
-
-  
+  final Category category;
 
   @override
-  Widget build(BuildContext context) {
-    final category = bucket.category;
-    final totalSpent = bucket.totalExpenses;
-
+  Widget build(BuildContext context, WidgetRef ref) {
+    final totalSpent = ref.watch(
+      getTotalByCategoryAndRange((category: category, range: TimeRange.month)),
+    );
 
     final percent = totalSpent / category.maxAmount;
 
-Color getAmountColor() {
-  if (percent >= 1.0) return Colors.red;       // przekroczony limit
-  if (percent >= 0.8) return Colors.orange;    // blisko limitu
-  return Colors.green;                         // bezpiecznie
-}
+    Color getAmountColor() {
+      if (percent >= 1.0) return Colors.red;
+      if (percent >= 0.8) return Colors.orange;
+      return Colors.green;
+    }
 
     return Card(
       child: InkWell(
-        onTap: () => onCategoryClick(existing: category),
+        onTap: () {},
+        /* opendialog*/
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: 10.0,
@@ -46,7 +44,7 @@ Color getAmountColor() {
               const SizedBox(width: 10),
               Icon(
                 Icons.favorite,
-                color: category.color,
+                color: Color(category.color),
                 size: 30,
               ),
               const Spacer(),
@@ -56,11 +54,17 @@ Color getAmountColor() {
                 children: [
                   Text(
                     '${totalSpent.toStringAsFixed(2)}',
-                    style:  TextStyle(fontWeight: FontWeight.bold, color: getAmountColor(), ),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: getAmountColor(),
+                    ),
                   ),
                   Text(
                     '/ ${category.maxAmount.toStringAsFixed(2)}',
-                    style: TextStyle(fontSize: 12, color:getAmountColor(),),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: getAmountColor(),
+                    ),
                   ),
                 ],
               ),
