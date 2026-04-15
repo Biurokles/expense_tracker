@@ -21,16 +21,7 @@ class ExpenseRepo {
   }
 
   List<Expense> getByRange(TimeRange range) {
-    final now = DateTime.now();
-
-    return box.values.where((expense) {
-      final sameTime = switch (range) {
-        TimeRange.day => expense.date.day == now.day,
-        TimeRange.month => expense.date.month == now.month,
-        TimeRange.year => expense.date.year == now.year,
-      };
-      return sameTime;
-    }).toList();
+    return box.values.where((expense) => range.matches(expense.date)).toList();
   }
 
   double getTotalByCategory(Category category) {

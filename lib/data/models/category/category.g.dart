@@ -43,8 +43,5 @@ class CategoryAdapter extends TypeAdapter<Category> {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CategoryAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
+      identical(this, other) || other is Category && other.id == typeId;
 }

@@ -1,7 +1,7 @@
 import 'package:expense_tracker/data/models/category/category.dart';
 import 'package:expense_tracker/data/models/expense/expense.dart';
-import 'package:expense_tracker/data/models/time_range.dart';
 import 'package:expense_tracker/provider/expense/tools/expense_repo_provider.dart';
+import 'package:expense_tracker/provider/timeRange/timeRangeProvider.dart';
 import 'package:riverpod/riverpod.dart';
 
 final expensesByCategoryProvider = Provider.family<List<Expense>, Category>((
@@ -12,33 +12,33 @@ final expensesByCategoryProvider = Provider.family<List<Expense>, Category>((
   return repo.getByCategory(category);
 });
 
-final expensesByRangeProvider = Provider.family<List<Expense>, TimeRange>((
-  ref,
-  range,
-) {
+final expensesByRangeProvider = Provider<List<Expense>>((ref) {
   final repo = ref.watch(expenseRepoProvider);
+  final range = ref.read(timeRangeProvider);
   return repo.getByRange(range);
 });
 
 final expenseByCategoryAndRange =
-    Provider.family<List<Expense>, ({Category category, TimeRange range})>(
+    Provider.family<List<Expense>, ({Category category})>(
       (
         ref,
         params,
       ) {
         final repo = ref.read(expenseRepoProvider);
-        final byRange = repo.getByRange(params.range);
+        final range = ref.read(timeRangeProvider);
+        final byRange = repo.getByRange(range);
         return byRange.where((e) => e.category == params.category).toList();
       },
     );
 
 final getTotalByCategoryAndRange =
-    Provider.family<double, ({Category category, TimeRange range})>((
+    Provider.family<double, ({Category category})>((
       ref,
       params,
     ) {
       final repo = ref.read(expenseRepoProvider);
-      final byRange = repo.getByRange(params.range);
+      final range = ref.read(timeRangeProvider);
+      final byRange = repo.getByRange(range);
       return byRange
           .where((e) => e.category == params.category)
           .fold(0.0, (sum, e) => sum += e.amount);

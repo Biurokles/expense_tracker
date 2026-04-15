@@ -1,4 +1,3 @@
-import 'package:expense_tracker/data/models/time_range.dart';
 import 'package:expense_tracker/provider/expense/state/expense_notifier.dart';
 import 'package:expense_tracker/widgets/categories/category_modal.dart';
 import 'package:expense_tracker/widgets/chart/chart.dart';
@@ -17,17 +16,6 @@ class Expenses extends ConsumerStatefulWidget {
 }
 
 class _ExpensesState extends ConsumerState<Expenses> {
-  void changeRange(TimeRange range) {
-    switch (range) {
-      case TimeRange.day:
-        return;
-      case TimeRange.month:
-        return;
-      case TimeRange.year:
-        return;
-    }
-  }
-
   void _openAddExpensesOverlay() {
     showModalBottomSheet(
       backgroundColor: Colors.transparent,
@@ -120,7 +108,9 @@ class _ExpensesState extends ConsumerState<Expenses> {
 
           return Column(
             children: [
-              Chart(changeExpensesRange: changeRange),
+              Chart(
+                expenseList: expenses,
+              ),
               Expanded(
                 child: isEmpty
                     ? const Text("Brak wydatków")

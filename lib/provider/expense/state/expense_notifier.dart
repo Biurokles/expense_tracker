@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:expense_tracker/data/models/category/category.dart';
 import 'package:expense_tracker/data/models/expense/expense.dart';
+import 'package:expense_tracker/data/models/time_range.dart';
 import 'package:expense_tracker/provider/expense/tools/expense_repo_provider.dart';
 import 'package:expense_tracker/data/repositories/expense_repo.dart';
+import 'package:expense_tracker/provider/timeRange/timeRangeProvider.dart';
 import 'package:riverpod/riverpod.dart';
 
 final expenseProvider = AsyncNotifierProvider<ExpenseNotifier, List<Expense>>(
@@ -15,6 +17,19 @@ final totalExpensesProvider = Provider<double>((ref) {
 
   return expensesAsync.when(
     data: (expenses) => expenses.fold(0.0, (sum, e) => sum + e.amount),
+    loading: () => 0.0,
+    error: (_, __) => 0.0,
+  );
+});
+
+final expensesByRangeProvider = Provider<double>((ref) {
+  final expensesAsync = ref.watch(expenseProvider);
+  final range = ref.watch(timeRangeProvider);
+
+  return expensesAsync.when(
+    data: (expenses) => expenses
+        .where((expense) => range.matches(expense.date))
+        .fold(0.0, (sum, e) => sum + e.amount),
     loading: () => 0.0,
     error: (_, __) => 0.0,
   );

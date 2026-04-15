@@ -1,5 +1,4 @@
 import 'package:expense_tracker/data/models/category/category.dart';
-import 'package:expense_tracker/data/models/time_range.dart';
 import 'package:expense_tracker/provider/expense/state/expense_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,7 +14,7 @@ class CategoryItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final totalSpent = ref.watch(
-      getTotalByCategoryAndRange((category: category, range: TimeRange.month)),
+      getTotalByCategoryAndRange((category: category)),
     );
 
     final percent = totalSpent / category.maxAmount;
@@ -29,7 +28,7 @@ class CategoryItem extends ConsumerWidget {
     return Card(
       child: InkWell(
         onTap: () {},
-        /* opendialog*/
+        /* TODO: dialog do podglądania wydatków po kliknięciu w kategorie*/
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: 10.0,

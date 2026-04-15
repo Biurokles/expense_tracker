@@ -41,7 +41,7 @@ class CategoriesList extends ConsumerWidget {
 
     Future<bool> _removeCategory(Category category) async {
       final isUsed = ref.read(isCategoryUsedProvider(category));
-
+      /* TODO: trzeba prześledzić logike poprawić bo coś mi tu nie pasuje*/
       final shouldDelete = !isUsed || await _confirmDelete();
 
       if (!shouldDelete) return false;
