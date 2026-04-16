@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
           ),
           Positioned.fill(
             child: Container(
-              color: Colors.black.withValues(alpha: 0.9), // 🔥 przyciemnia
+              color: Colors.black.withValues(alpha: 0.9),
             ),
           ),
           const Expenses(),

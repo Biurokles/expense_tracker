@@ -2,7 +2,6 @@ import 'package:expense_tracker/data/models/category/category.dart';
 import 'package:expense_tracker/data/models/expense/expense.dart';
 import 'package:expense_tracker/data/models/time_range.dart';
 import 'package:expense_tracker/provider/expense/state/expense_notifier.dart';
-import 'package:expense_tracker/provider/expense/tools/expense_repo_provider.dart';
 import 'package:expense_tracker/provider/timeRange/timeRangeProvider.dart';
 import 'package:riverpod/riverpod.dart';
 
@@ -10,8 +9,15 @@ final expensesByCategoryProvider = Provider.family<List<Expense>, Category>((
   ref,
   category,
 ) {
-  final repo = ref.watch(expenseRepoProvider);
-  return repo.getByCategory(category);
+  final expenseAsync = ref.watch(expenseProvider);
+
+  return expenseAsync.when(
+    data: (expenseList) =>
+        expenseList.where((e) => e.category.id == category.id).toList()
+          ..sort((a, b) => b.date.compareTo(a.date)),
+    error: (_, __) => [],
+    loading: () => [],
+  );
 });
 
 final expensesByRangeProvider = Provider<List<Expense>>((ref) {
@@ -19,7 +25,8 @@ final expensesByRangeProvider = Provider<List<Expense>>((ref) {
   final range = ref.watch(timeRangeProvider);
   return expenseAsync.when(
     data: (expenseList) =>
-        expenseList.where((e) => range.matches(e.date)).toList(),
+        expenseList.where((e) => range.matches(e.date)).toList()
+          ..sort((a, b) => b.date.compareTo(a.date)),
     error: (_, __) => [],
     loading: () => [],
   );

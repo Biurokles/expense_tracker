@@ -72,11 +72,11 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
         context: context,
         builder: (ctx) => AlertDialog(
           title: const Text('womp womp'),
-          content: const Text('Popraw dane 😄'),
+          content: const Text('Łiła! nie tak wpisałaś! Poprawo to'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text("OK"),
+              child: const Text("dobsie dobsie"),
             ),
           ],
         ),

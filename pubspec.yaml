@@ -50,5 +50,6 @@ flutter:
     - assets/logo.png
     - assets/category.jpg
     - assets/expenses.jpg
+    - assets/expense_scaffold.png
 
   uses-material-design: true

@@ -1,5 +1,6 @@
 import 'package:expense_tracker/data/models/category/category.dart';
 import 'package:expense_tracker/provider/expense/state/expense_providers.dart';
+import 'package:expense_tracker/widgets/categories/category_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,8 +28,16 @@ class CategoryItem extends ConsumerWidget {
 
     return Card(
       child: InkWell(
-        onTap: () {},
-        /* TODO: dialog do podglądania wydatków po kliknięciu w kategorie*/
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (ctx) => CategoryScaffold(
+                category: category,
+              ),
+            ),
+          );
+        },
+
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: 10.0,
