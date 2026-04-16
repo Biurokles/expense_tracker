@@ -5,7 +5,6 @@ import 'package:expense_tracker/provider/category/state/category_notifier.dart';
 import 'package:expense_tracker/provider/timeRange/timeRangeProvider.dart';
 import 'package:expense_tracker/widgets/chart/chart_legend.dart';
 import 'package:expense_tracker/widgets/chart/pie_chart.dart';
-import 'package:expense_tracker/widgets/chart/text_inside_pie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -72,28 +71,7 @@ class _ChartState extends ConsumerState<Chart> {
           children: [
             buildRangeSelector(),
             const SizedBox(height: 12),
-
-            SizedBox(
-              height: 220,
-              child: widget.expenseList.length == 0
-                  ? Center(child: Text(selectedRange.emptyChartMessage()))
-                  : Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        ChartInit(categoryList: categoryList),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              selectedRange.rangeText(),
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            TextInsidePie(),
-                          ],
-                        ),
-                      ],
-                    ),
-            ),
+            ChartInit(categoryList: categoryList),
 
             const SizedBox(height: 12),
             ChartLegend(categoryList: categoryList),

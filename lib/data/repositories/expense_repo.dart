@@ -24,18 +24,6 @@ class ExpenseRepo {
     return box.values.where((expense) => range.matches(expense.date)).toList();
   }
 
-  double getTotalByCategory(Category category) {
-    return box.values
-        .where((e) => e.category.id == category.id)
-        .fold(0.0, (sum, e) => sum + e.amount);
-  }
-
-  bool isCategoryUsed(Category category) {
-    return box.values.any(
-      (e) => e.category.name == category.name,
-    );
-  }
-
   List<Expense> getByCategoryAndRange(Category category, TimeRange range) {
     return getByCategory(category, expenses: getByRange(range));
   }

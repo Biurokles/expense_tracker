@@ -14,7 +14,7 @@ class CategoryItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final totalSpent = ref.watch(
-      getTotalByCategoryAndRange((category: category)),
+      totalByCategoryAndRangeProvider(category),
     );
 
     final percent = totalSpent / category.maxAmount;

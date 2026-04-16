@@ -1,4 +1,5 @@
 import 'package:expense_tracker/provider/expense/state/expense_notifier.dart';
+import 'package:expense_tracker/provider/expense/state/expense_providers.dart';
 import 'package:expense_tracker/widgets/categories/category_modal.dart';
 import 'package:expense_tracker/widgets/chart/chart.dart';
 import 'package:expense_tracker/widgets/expenses_list/expenses_list.dart';
@@ -85,6 +86,7 @@ class _ExpensesState extends ConsumerState<Expenses> {
   @override
   Widget build(BuildContext context) {
     final expenseAsync = ref.watch(expenseProvider);
+    final expensesByRangeAsync = ref.watch(expensesByRangeProvider);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -102,37 +104,35 @@ class _ExpensesState extends ConsumerState<Expenses> {
           ),
         ],
       ),
-      body: expenseAsync.when(
-        data: (expenses) {
-          final isEmpty = expenses.isEmpty;
-
-          return Column(
-            children: [
-              Chart(
+      body: Column(
+        children: [
+          expenseAsync.when(
+            data: (expenses) {
+              return Chart(
                 expenseList: expenses,
-              ),
-              Expanded(
-                child: isEmpty
-                    ? const Text("Brak wydatków")
-                    : ExpensesList(
-                        expenses: expenses,
-                      ),
-              ),
-            ],
-          );
-        },
+              );
+            },
 
-        loading: () {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        },
+            loading: () {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            },
 
-        error: (err, _) {
-          return Scaffold(
-            body: Center(child: Text("Błąd: $err")),
-          );
-        },
+            error: (err, _) {
+              return Scaffold(
+                body: Center(child: Text("Błąd: $err")),
+              );
+            },
+          ),
+          Expanded(
+            child: expensesByRangeAsync.isEmpty
+                ? const Text("Brak wydatków")
+                : ExpensesList(
+                    expenses: expensesByRangeAsync,
+                  ),
+          ),
+        ],
       ),
     );
   }

@@ -1,5 +1,7 @@
 import 'package:expense_tracker/data/models/category/category.dart';
+import 'package:expense_tracker/data/models/time_range.dart';
 import 'package:expense_tracker/provider/expense/state/expense_providers.dart';
+import 'package:expense_tracker/provider/timeRange/timeRangeProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,7 +15,15 @@ class ChartLegend extends ConsumerWidget {
       spacing: 12,
       runSpacing: 8,
       children: categoryList.map((category) {
-        final totalLegend = ref.watch(totalByCategoryProvider(category));
+        final totalLegend = ref.watch(
+          totalByCategoryAndRangeProvider(category),
+        );
+        final range = ref.watch(timeRangeProvider);
+        final timeRangeMaxAmount = switch (range) {
+          TimeRange.day => category.maxAmount / 30,
+          TimeRange.month => category.maxAmount,
+          TimeRange.year => category.maxAmount * 12,
+        };
 
         return Row(
           mainAxisSize: MainAxisSize.min,
@@ -31,7 +41,7 @@ class ChartLegend extends ConsumerWidget {
               children: [
                 Text(category.name),
                 Text(
-                  '${totalLegend.toStringAsFixed(2)} / ${category.maxAmount}',
+                  '${totalLegend.toStringAsFixed(2)} / ${timeRangeMaxAmount}',
                   style: const TextStyle(fontSize: 12, color: Colors.white),
                 ),
               ],
