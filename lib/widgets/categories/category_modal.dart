@@ -27,7 +27,7 @@ class _CategoryModalState extends ConsumerState<CategoryModal> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Pick a color!'),
+          title: const Text('Wybierz kolorek!'),
           content: SingleChildScrollView(
             child: ColorPicker(
               pickerColor: tempColor,

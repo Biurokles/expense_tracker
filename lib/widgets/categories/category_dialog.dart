@@ -5,7 +5,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:expense_tracker/data/models/category/category.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-Future<Category?> showCategoryDialog(
+Future<String?> showCategoryDialog(
   BuildContext context, {
   Category? existing,
 }) async {
@@ -22,7 +22,7 @@ Future<Category?> showCategoryDialog(
   Future<Color?> pickColor() async {
     Color tempColor = dialogColor;
 
-    final result = await showDialog<Color>(
+    final colorResult = await showDialog<Color>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -47,10 +47,10 @@ Future<Category?> showCategoryDialog(
       },
     );
 
-    return result;
+    return colorResult;
   }
 
-  final result = await showDialog<Category>(
+  final result = await showDialog<String>(
     context: context,
     builder: (ctx) {
       return StatefulBuilder(
@@ -155,7 +155,7 @@ Future<Category?> showCategoryDialog(
                                     )
                               : ref
                                     .read(categoryProvider.notifier)
-                                    .updateCategory(
+                                    .addCategory(
                                       Category(
                                         name: titleController.text,
                                         color: dialogColor.toARGB32(),
@@ -164,7 +164,7 @@ Future<Category?> showCategoryDialog(
                                         ),
                                       ),
                                     );
-                          Navigator.pop(ctx);
+                          Navigator.pop(ctx, titleController.text);
                         },
                         child: const Text('Zapisz'),
                       ),

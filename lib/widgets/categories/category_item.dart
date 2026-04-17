@@ -1,5 +1,6 @@
 import 'package:expense_tracker/data/models/category/category.dart';
 import 'package:expense_tracker/provider/expense/state/expense_providers.dart';
+import 'package:expense_tracker/widgets/categories/category_dialog.dart';
 import 'package:expense_tracker/widgets/categories/category_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,6 +37,9 @@ class CategoryItem extends ConsumerWidget {
               ),
             ),
           );
+        },
+        onLongPress: () {
+          showCategoryDialog(context, existing: category);
         },
 
         child: Padding(

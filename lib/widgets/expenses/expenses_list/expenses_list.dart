@@ -1,8 +1,8 @@
 import 'package:expense_tracker/provider/expense/state/expense_notifier.dart';
-import 'package:expense_tracker/widgets/expenses_list/expenses_item.dart';
+import 'package:expense_tracker/widgets/expenses/expenses_list/expenses_item.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/models/expense/expense.dart';
+import '../../../data/models/expense/expense.dart';
 import 'package:flutter/material.dart';
 
 class ExpensesList extends ConsumerWidget {

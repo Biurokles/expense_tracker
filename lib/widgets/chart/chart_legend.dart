@@ -20,7 +20,7 @@ class ChartLegend extends ConsumerWidget {
         );
         final range = ref.watch(timeRangeProvider);
         final timeRangeMaxAmount = switch (range) {
-          TimeRange.day => category.maxAmount / 30,
+          TimeRange.day => category.maxAmount,
           TimeRange.month => category.maxAmount,
           TimeRange.year => category.maxAmount * 12,
         };
@@ -41,7 +41,7 @@ class ChartLegend extends ConsumerWidget {
               children: [
                 Text(category.name),
                 Text(
-                  '${totalLegend.toStringAsFixed(2)} / ${timeRangeMaxAmount}',
+                  '${totalLegend.toStringAsFixed(2)} / ${timeRangeMaxAmount.toStringAsFixed(2)}',
                   style: const TextStyle(fontSize: 12, color: Colors.white),
                 ),
               ],

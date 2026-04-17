@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import "package:expense_tracker/data/models/expense/expense.dart";
 import 'package:expense_tracker/data/models/category/category.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'categories/category_dialog.dart';
+import '../categories/category_dialog.dart';
 
 class NewExpense extends ConsumerStatefulWidget {
   const NewExpense({super.key});
@@ -108,6 +108,18 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
   @override
   Widget build(BuildContext context) {
     final categoryState = ref.watch(categoryProvider);
+    late final newCategoryStatus;
+    ref.listen(categoryProvider, (
+      previous,
+      next,
+    ) {
+      final category = next.value!.firstWhere(
+        (e) => newCategoryStatus.toString() == e.name,
+      );
+      setState(() {
+        _selectedCategory = category;
+      });
+    });
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 48, 16, 16),
@@ -132,7 +144,7 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
                     FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
                   ],
                   decoration: const InputDecoration(
-                    prefixText: 'PLN ',
+                    prefixText: 'Polskich złociszy ',
                     labelText: 'Ile?',
                   ),
                 ),
@@ -205,10 +217,9 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
           ),
 
           const SizedBox(height: 8),
-
           IconButton(
-            onPressed: () {
-              showCategoryDialog(context);
+            onPressed: () async {
+              newCategoryStatus = await showCategoryDialog(context);
             },
             icon: const Icon(Icons.add),
           ),

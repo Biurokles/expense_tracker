@@ -32,6 +32,26 @@ final expensesByRangeProvider = Provider<List<Expense>>((ref) {
   );
 });
 
+final expenseByDateProvider =
+    Provider.family<List<Expense>, ({DateTime start, DateTime end})>(
+      (ref, params) {
+        final expenses = ref.watch(expenseProvider);
+        return expenses.when(
+          data: (expenseList) {
+            return expenseList
+                .where(
+                  (e) =>
+                      e.date.isAfter(params.start) &&
+                      e.date.isBefore(params.end),
+                )
+                .toList();
+          },
+          error: (_, __) => [],
+          loading: () => [],
+        );
+      },
+    );
+
 final expenseByCategoryAndRangeProvider =
     Provider.family<List<Expense>, ({Category category})>(
       (

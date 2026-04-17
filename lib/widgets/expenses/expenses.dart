@@ -2,8 +2,9 @@ import 'package:expense_tracker/provider/expense/state/expense_notifier.dart';
 import 'package:expense_tracker/provider/expense/state/expense_providers.dart';
 import 'package:expense_tracker/widgets/categories/category_modal.dart';
 import 'package:expense_tracker/widgets/chart/chart.dart';
-import 'package:expense_tracker/widgets/expenses_list/expenses_list.dart';
-import 'package:expense_tracker/widgets/new_expense.dart';
+import 'package:expense_tracker/widgets/expenses/expense_scaffold.dart';
+import 'package:expense_tracker/widgets/expenses/expenses_list/expenses_list.dart';
+import 'package:expense_tracker/widgets/expenses/new_expense.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -94,6 +95,16 @@ class _ExpensesState extends ConsumerState<Expenses> {
         backgroundColor: Colors.transparent,
         title: const Text("Łakocia wydatki śledź"),
         actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (ctx) => (ExpenseScaffold()),
+                ),
+              );
+            },
+            icon: const Icon(Icons.filter_alt_rounded),
+          ),
           IconButton(
             onPressed: _openAddCategoriesOverlay,
             icon: const Icon(Icons.category),

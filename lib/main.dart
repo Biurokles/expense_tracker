@@ -1,7 +1,7 @@
 import 'package:expense_tracker/data/models/category/category.dart' as models;
 import 'package:expense_tracker/data/models/expense/expense.dart';
 import 'package:flutter/material.dart';
-import 'package:expense_tracker/widgets/expenses.dart';
+import 'package:expense_tracker/widgets/expenses/expenses.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
           ),
           Positioned.fill(
             child: Container(
-              color: Colors.black.withValues(alpha: 0.9),
+              color: Colors.black.withValues(alpha: 0.5),
             ),
           ),
           const Expenses(),
