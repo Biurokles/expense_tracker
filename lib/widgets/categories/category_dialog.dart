@@ -5,7 +5,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:expense_tracker/data/models/category/category.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-Future<String?> showCategoryDialog(
+Future<Category?> showCategoryDialog(
   BuildContext context, {
   Category? existing,
 }) async {
@@ -50,7 +50,7 @@ Future<String?> showCategoryDialog(
     return colorResult;
   }
 
-  final result = await showDialog<String>(
+  final result = await showDialog<Category>(
     context: context,
     builder: (ctx) {
       return StatefulBuilder(
@@ -139,32 +139,34 @@ Future<String?> showCategoryDialog(
                       ElevatedButton(
                         onPressed: () {
                           if (!formKey.currentState!.validate()) return;
-
+                          late final category;
                           existing != null
-                              ? ref
-                                    .read(categoryProvider.notifier)
-                                    .updateCategory(
-                                      Category(
-                                        id: existing.id,
-                                        name: titleController.text,
-                                        color: dialogColor.toARGB32(),
-                                        maxAmount: double.parse(
-                                          maxAmountController.text,
-                                        ),
-                                      ),
-                                    )
-                              : ref
-                                    .read(categoryProvider.notifier)
-                                    .addCategory(
-                                      Category(
-                                        name: titleController.text,
-                                        color: dialogColor.toARGB32(),
-                                        maxAmount: double.parse(
-                                          maxAmountController.text,
-                                        ),
-                                      ),
-                                    );
-                          Navigator.pop(ctx, titleController.text);
+                              ? {
+                                  category = Category(
+                                    id: existing.id,
+                                    name: titleController.text,
+                                    color: dialogColor.toARGB32(),
+                                    maxAmount: double.parse(
+                                      maxAmountController.text,
+                                    ),
+                                  ),
+                                  ref
+                                      .read(categoryProvider.notifier)
+                                      .updateCategory(category),
+                                }
+                              : {
+                                  category = Category(
+                                    name: titleController.text,
+                                    color: dialogColor.toARGB32(),
+                                    maxAmount: double.parse(
+                                      maxAmountController.text,
+                                    ),
+                                  ),
+                                  ref
+                                      .read(categoryProvider.notifier)
+                                      .addCategory(category),
+                                };
+                          Navigator.pop(ctx, category);
                         },
                         child: const Text('Zapisz'),
                       ),

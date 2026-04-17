@@ -54,11 +54,18 @@ class CategoryItem extends ConsumerWidget {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(width: 10),
-              Icon(
-                Icons.favorite,
-                color: Color(category.color),
-                size: 30,
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  const Icon(Icons.favorite, color: Colors.white, size: 34),
+                  Icon(
+                    Icons.favorite,
+                    color: Color(category.color),
+                    size: 30,
+                  ),
+                ],
               ),
+
               const Spacer(),
 
               Column(

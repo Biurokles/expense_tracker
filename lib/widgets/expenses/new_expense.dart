@@ -108,18 +108,6 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
   @override
   Widget build(BuildContext context) {
     final categoryState = ref.watch(categoryProvider);
-    late final newCategoryStatus;
-    ref.listen(categoryProvider, (
-      previous,
-      next,
-    ) {
-      final category = next.value!.firstWhere(
-        (e) => newCategoryStatus.toString() == e.name,
-      );
-      setState(() {
-        _selectedCategory = category;
-      });
-    });
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 48, 16, 16),
@@ -219,7 +207,13 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
           const SizedBox(height: 8),
           IconButton(
             onPressed: () async {
-              newCategoryStatus = await showCategoryDialog(context);
+              final newCategory = await showCategoryDialog(context);
+
+              if (newCategory != null) {
+                setState(() {
+                  _selectedCategory = newCategory;
+                });
+              }
             },
             icon: const Icon(Icons.add),
           ),

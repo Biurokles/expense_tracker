@@ -26,14 +26,15 @@ class ExpensesItem extends StatelessWidget {
             ),
             Spacer(),
             Text(
-              'polskich złociszy',
+              expense.amount.toString(),
+              style: Theme.of(context).textTheme.titleLarge,
             ),
+
             SizedBox(
               width: 4,
             ),
             Text(
-              expense.amount.toString(),
-              style: Theme.of(context).textTheme.titleLarge,
+              'Pz',
             ),
           ],
         ),
