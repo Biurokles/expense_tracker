@@ -36,17 +36,21 @@ class ExpenseRepo {
     await box.delete(expense.id);
   }
 
-  Future<void> deleteByCategory(Category category) async {
-    final keysToDelete = <dynamic>[];
+  Future _queue = Future.value();
 
-    for (final expense in box.values) {
-      if (expense.category == category) {
-        keysToDelete.add(expense.id);
-      }
-    }
+  Future<void> _runSequential(Future<void> Function() task) {
+    _queue = _queue.then((_) => task());
+    return _queue;
+  }
 
-    for (final key in keysToDelete) {
-      await box.delete(key);
-    }
+  Future<void> deleteByCategory(Category category) {
+    return _runSequential(() async {
+      final keysToDelete = box.keys.where((key) {
+        final expense = box.get(key);
+        return expense?.category == category;
+      }).toList();
+
+      await box.deleteAll(keysToDelete);
+    });
   }
 }

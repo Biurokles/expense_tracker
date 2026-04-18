@@ -52,5 +52,6 @@ flutter:
     - assets/category.jpg
     - assets/expenses.jpg
     - assets/expense_scaffold.png
+    - assets/lacoin.png
 
   uses-material-design: true

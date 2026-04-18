@@ -31,10 +31,12 @@ class ExpensesItem extends StatelessWidget {
             ),
 
             SizedBox(
-              width: 4,
+              width: 8,
             ),
-            Text(
-              'Pz',
+            Image.asset(
+              'assets/lacoin.png',
+              width: 65,
+              fit: BoxFit.fitWidth,
             ),
           ],
         ),
